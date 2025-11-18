@@ -8,27 +8,37 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ReportController;
 
-// Dashboard
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+// Rotas públicas - redireciona para login
+Route::get('/', function () {
+    return redirect()->route('login');
+});
 
-// Reports
-Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.export-pdf');
+// Rotas protegidas por autenticação
+Route::middleware(['auth'])->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-// Service Orders
-Route::resource('service-orders', ServiceOrderController::class);
-Route::post('service-orders/{serviceOrder}/status', [ServiceOrderController::class, 'updateStatus'])
-    ->name('service-orders.update-status');
-Route::get('service-orders/{serviceOrder}/pdf', [ServiceOrderController::class, 'exportPdf'])
-    ->name('service-orders.export-pdf');
+    // Reports
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.export-pdf');
 
-// Sales
-Route::resource('sales', SaleController::class)->except(['edit', 'update']);
-Route::get('sales/{sale}/pdf', [SaleController::class, 'exportPdf'])
-    ->name('sales.export-pdf');
+    // Service Orders
+    Route::resource('service-orders', ServiceOrderController::class);
+    Route::post('service-orders/{serviceOrder}/status', [ServiceOrderController::class, 'updateStatus'])
+        ->name('service-orders.update-status');
+    Route::get('service-orders/{serviceOrder}/pdf', [ServiceOrderController::class, 'exportPdf'])
+        ->name('service-orders.export-pdf');
 
-// Products
-Route::resource('products', ProductController::class);
+    // Sales
+    Route::resource('sales', SaleController::class)->except(['edit', 'update']);
+    Route::get('sales/{sale}/pdf', [SaleController::class, 'exportPdf'])
+        ->name('sales.export-pdf');
 
-// Customers
-Route::resource('customers', CustomerController::class);
+    // Products
+    Route::resource('products', ProductController::class);
+
+    // Customers
+    Route::resource('customers', CustomerController::class);
+});
+
+require __DIR__.'/auth.php';

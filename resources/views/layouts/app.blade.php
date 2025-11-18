@@ -148,12 +148,32 @@
     
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
-        <div class="p-3 d-flex justify-content-between align-items-center">
+        <div class="p-3 d-flex justify-content-between align-items-center border-bottom">
             <h4 class="text-white mb-0"><i class="bi bi-phone"></i> JD Smart</h4>
             <button class="btn btn-link text-white d-md-none" id="closeSidebar">
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
+
+        <!-- User Info -->
+        @auth
+        <div class="p-3 border-bottom">
+            <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-person-circle fs-3 text-white me-2"></i>
+                <div>
+                    <div class="text-white fw-bold small">{{ Auth::user()->name }}</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">{{ Auth::user()->email }}</div>
+                </div>
+            </div>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="btn btn-danger btn-sm w-100">
+                    <i class="bi bi-box-arrow-right"></i> Sair
+                </button>
+            </form>
+        </div>
+        @endauth
+
         <nav class="nav flex-column">
             <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                 <i class="bi bi-speedometer2"></i> Dashboard

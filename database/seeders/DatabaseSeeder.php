@@ -12,6 +12,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Criar usuários primeiro
+        $this->call(UserSeeder::class);
+        
         // Criar clientes
         $customers = [
             [
