@@ -13,6 +13,9 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+// Rota pública para rastreamento de Ordem de Serviço
+Route::get('/os/{orderNumber}', [ServiceOrderController::class, 'track'])->name('service-orders.track');
+
 // Rotas protegidas por autenticação
 Route::middleware(['auth'])->group(function () {
     // Dashboard

@@ -112,4 +112,23 @@ class ServiceOrderController extends Controller
 
         return $pdf->download('ordem-servico-' . $serviceOrder->id . '.pdf');
     }
+
+    /**
+     * Rastreamento público de ordem de serviço
+     */
+    public function track($orderNumber)
+    {
+        // Busca a ordem pelo ID
+        $serviceOrder = ServiceOrder::with('customer')->find($orderNumber);
+
+        if (!$serviceOrder) {
+            return view('service-orders.track-not-found', [
+                'orderNumber' => $orderNumber
+            ]);
+        }
+
+        return view('service-orders.track', [
+            'order' => $serviceOrder
+        ]);
+    }
 }

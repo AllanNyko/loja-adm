@@ -18,11 +18,25 @@
         }
         .header h1 {
             margin: 0;
-            color: #333;
+            font-size: 24px;
+        }
+        .header h1 .jd {
+            color: #000;
+            font-weight: 900;
+        }
+        .header h1 .smart {
+            color: #FFD700;
+            font-weight: 900;
         }
         .header p {
             margin: 5px 0;
+            color: #333;
+        }
+        .header .contact-info {
+            margin-top: 10px;
+            font-size: 10px;
             color: #666;
+            line-height: 1.4;
         }
         .summary {
             margin: 20px 0;
@@ -44,16 +58,18 @@
         }
         .summary-item h3 {
             margin: 0 0 5px 0;
-            color: #666;
+            color: #000;
             font-size: 12px;
+            font-weight: bold;
         }
         .summary-item p {
             margin: 0;
             font-size: 18px;
             font-weight: bold;
+            color: #333;
         }
         .summary-item.total p {
-            color: #0d6efd;
+            color: #000;
         }
         table {
             width: 100%;
@@ -100,7 +116,8 @@
             page-break-inside: avoid;
         }
         .chart-section h2 {
-            color: #333;
+            color: #000;
+            font-weight: bold;
             border-bottom: 2px solid #333;
             padding-bottom: 5px;
             margin-bottom: 15px;
@@ -116,9 +133,14 @@
 </head>
 <body>
     <div class="header">
-        <h1>📱 JD Smart Shop</h1>
-        <p>Relatório de Faturamento - {{ $month }}</p>
-        <p>Gerado em: {{ now()->format('d/m/Y H:i') }}</p>
+        <h1><span class="jd">JD</span> <span class="smart">SMART</span></h1>
+        <p>Reparos de Celular e Acessórios</p>
+        <div class="contact-info">
+            <strong>Endereço:</strong> Av. Pérsio de Queirós Filho, 919 - Catiapoã, São Vicente - SP, 11370-304<br>
+            <strong>Telefone:</strong> (13) 99784-1161
+        </div>
+        <h2 style="margin-top: 15px; color: #000; font-weight: bold;">RELATÓRIO DE FATURAMENTO - {{ $month }}</h2>
+        <p style="font-size: 10px; color: #666;">Gerado em: {{ now()->format('d/m/Y H:i') }}</p>
     </div>
 
     <div class="summary">

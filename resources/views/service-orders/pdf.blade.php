@@ -20,24 +20,38 @@
         .header {
             text-align: center;
             margin-bottom: 30px;
-            border-bottom: 3px solid #0d6efd;
+            border-bottom: 3px solid #333;
             padding-bottom: 15px;
         }
         .header h1 {
-            color: #0d6efd;
             font-size: 24px;
             margin-bottom: 5px;
         }
+        .header h1 .jd {
+            color: #000;
+            font-weight: 900;
+        }
+        .header h1 .smart {
+            color: #FFD700;
+            font-weight: 900;
+        }
         .header p {
-            color: #666;
+            color: #333;
             font-size: 11px;
+        }
+        .header .contact-info {
+            margin-top: 10px;
+            font-size: 10px;
+            color: #666;
+            line-height: 1.4;
         }
         .order-info {
             margin-bottom: 25px;
         }
         .order-info h2 {
             font-size: 16px;
-            color: #0d6efd;
+            color: #000;
+            font-weight: bold;
             margin-bottom: 10px;
             border-bottom: 2px solid #e9ecef;
             padding-bottom: 5px;
@@ -55,13 +69,13 @@
         }
         .info-item label {
             font-weight: bold;
-            color: #495057;
+            color: #000;
             display: block;
             font-size: 10px;
             margin-bottom: 3px;
         }
         .info-item p {
-            color: #212529;
+            color: #333;
             font-size: 12px;
         }
         .full-width {
@@ -123,8 +137,13 @@
 </head>
 <body>
     <div class="header">
-        <h1>ORDEM DE SERVIÇO #{{ $order->id }}</h1>
-        <p>Sistema de Gerenciamento de Reparos de Celulares</p>
+        <h1><span class="jd">JD</span> <span class="smart">SMART</span></h1>
+        <p>Reparos de Celular e Acessórios</p>
+        <div class="contact-info">
+            <strong>Endereço:</strong> Av. Pérsio de Queirós Filho, 919 - Catiapoã, São Vicente - SP, 11370-304<br>
+            <strong>Telefone:</strong> (13) 99784-1161
+        </div>
+        <h2 style="margin-top: 15px; color: #000; font-weight: bold;">ORDEM DE SERVIÇO #{{ $order->id }}</h2>
     </div>
 
     <div class="order-info">
