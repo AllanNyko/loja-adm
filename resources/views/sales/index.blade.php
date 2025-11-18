@@ -29,7 +29,7 @@
                     @forelse($sales as $sale)
                     <tr>
                         <td>{{ $sale->id }}</td>
-                        <td>{{ $sale->customer?->name ?? 'Não informado' }}</td>
+                        <td>{{ $sale->customer?->name ?? 'Venda Comum' }}</td>
                         <td><strong>R$ {{ number_format($sale->total, 2, ',', '.') }}</strong></td>
                         <td>{{ $sale->payment_method_label }}</td>
                         <td>{{ $sale->created_at->format('d/m/Y H:i') }}</td>
@@ -37,6 +37,9 @@
                             <div class="btn-group btn-group-sm">
                                 <a href="{{ route('sales.show', $sale) }}" class="btn btn-info" title="Ver">
                                     <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ route('sales.export-pdf', $sale) }}" class="btn btn-warning" title="Exportar PDF">
+                                    <i class="bi bi-file-pdf"></i>
                                 </a>
                                 <form action="{{ route('sales.destroy', $sale) }}" method="POST" class="d-inline">
                                     @csrf

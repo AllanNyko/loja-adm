@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SaleController extends Controller
 {
@@ -29,6 +30,8 @@ class SaleController extends Controller
         $validated = $request->validate([
             'customer_id' => 'nullable|exists:customers,id',
             'payment_method' => 'required|in:dinheiro,cartao_debito,cartao_credito,pix,outro',
+            'discount_type' => 'required|in:percentage,amount',
+            'discount_value' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
@@ -36,10 +39,10 @@ class SaleController extends Controller
         ]);
 
         DB::transaction(function () use ($validated) {
-            $total = 0;
+            $subtotal = 0;
             $items = [];
 
-            // Calcular total e preparar itens
+            // Calcular subtotal e preparar itens
             foreach ($validated['items'] as $item) {
                 $product = Product::findOrFail($item['product_id']);
                 
@@ -48,23 +51,42 @@ class SaleController extends Controller
                     throw new \Exception("Estoque insuficiente para {$product->name}");
                 }
 
-                $subtotal = $product->price * $item['quantity'];
-                $total += $subtotal;
+                $itemSubtotal = $product->price * $item['quantity'];
+                $subtotal += $itemSubtotal;
 
                 $items[] = [
                     'product_id' => $product->id,
                     'quantity' => $item['quantity'],
                     'unit_price' => $product->price,
-                    'subtotal' => $subtotal,
+                    'subtotal' => $itemSubtotal,
                 ];
 
                 // Atualizar estoque
                 $product->decrement('stock', $item['quantity']);
             }
 
+            // Calcular desconto
+            $discountPercentage = 0;
+            $discountAmount = 0;
+            
+            if (isset($validated['discount_value']) && $validated['discount_value'] > 0) {
+                if ($validated['discount_type'] === 'percentage') {
+                    $discountPercentage = min($validated['discount_value'], 100); // Máximo 100%
+                    $discountAmount = ($subtotal * $discountPercentage) / 100;
+                } else {
+                    $discountAmount = min($validated['discount_value'], $subtotal); // Não pode ser maior que subtotal
+                    $discountPercentage = ($discountAmount / $subtotal) * 100;
+                }
+            }
+
+            $total = $subtotal - $discountAmount;
+
             // Criar venda
             $sale = Sale::create([
                 'customer_id' => $validated['customer_id'],
+                'subtotal' => $subtotal,
+                'discount_percentage' => $discountPercentage,
+                'discount_amount' => $discountAmount,
                 'total' => $total,
                 'payment_method' => $validated['payment_method'],
                 'notes' => $validated['notes'] ?? null,
@@ -97,5 +119,16 @@ class SaleController extends Controller
 
         return redirect()->route('sales.index')
             ->with('success', 'Venda removida com sucesso!');
+    }
+
+    public function exportPdf(Sale $sale)
+    {
+        $sale->load('customer', 'items.product');
+        
+        $pdf = Pdf::loadView('sales.pdf', [
+            'sale' => $sale,
+        ]);
+
+        return $pdf->download('venda-' . $sale->id . '.pdf');
     }
 }

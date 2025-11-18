@@ -53,6 +53,17 @@
                     </div>
 
                     <div class="mb-3">
+                        <label for="price" class="form-label">Valor do Serviço *</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input type="number" step="0.01" name="price" id="price" class="form-control @error('price') is-invalid @enderror" value="{{ old('price', $serviceOrder->price) }}" required>
+                        </div>
+                        @error('price')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
                         <label for="diagnostic" class="form-label">Diagnóstico Técnico</label>
                         <textarea name="diagnostic" id="diagnostic" rows="3" class="form-control @error('diagnostic') is-invalid @enderror">{{ old('diagnostic', $serviceOrder->diagnostic) }}</textarea>
                         @error('diagnostic')

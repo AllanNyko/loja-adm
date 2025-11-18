@@ -10,12 +10,18 @@ class Sale extends Model
 {
     protected $fillable = [
         'customer_id',
+        'subtotal',
+        'discount_percentage',
+        'discount_amount',
         'total',
         'payment_method',
         'notes',
     ];
 
     protected $casts = [
+        'subtotal' => 'decimal:2',
+        'discount_percentage' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
         'total' => 'decimal:2',
     ];
 

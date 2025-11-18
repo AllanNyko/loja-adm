@@ -108,6 +108,7 @@ class DatabaseSeeder extends Seeder
                 'device_model' => 'iPhone 11',
                 'device_imei' => '123456789012345',
                 'problem_description' => 'Tela trincada após queda',
+                'price' => 450.00,
                 'diagnostic' => 'Necessário trocar display completo',
                 'estimated_cost' => 450.00,
                 'final_cost' => null,
@@ -120,6 +121,7 @@ class DatabaseSeeder extends Seeder
                 'device_model' => 'Samsung Galaxy A32',
                 'device_imei' => '987654321098765',
                 'problem_description' => 'Bateria descarregando rápido',
+                'price' => 180.00,
                 'diagnostic' => 'Bateria com vida útil esgotada',
                 'estimated_cost' => 180.00,
                 'final_cost' => null,
@@ -132,6 +134,7 @@ class DatabaseSeeder extends Seeder
                 'device_model' => 'Xiaomi Redmi Note 10',
                 'device_imei' => null,
                 'problem_description' => 'Não está carregando',
+                'price' => 120.00,
                 'diagnostic' => null,
                 'estimated_cost' => null,
                 'final_cost' => null,
@@ -144,6 +147,7 @@ class DatabaseSeeder extends Seeder
                 'device_model' => 'iPhone 13',
                 'device_imei' => '456789123456789',
                 'problem_description' => 'Alto-falante sem som',
+                'price' => 200.00,
                 'diagnostic' => 'Alto-falante queimado',
                 'estimated_cost' => 200.00,
                 'final_cost' => 200.00,
@@ -158,8 +162,12 @@ class DatabaseSeeder extends Seeder
         }
 
         // Criar algumas vendas
+        // Venda 1: Sem desconto
         $sale1 = Sale::create([
             'customer_id' => 2,
+            'subtotal' => 51.80,
+            'discount_percentage' => 0.00,
+            'discount_amount' => 0.00,
             'total' => 51.80,
             'payment_method' => 'pix',
             'notes' => null,
@@ -172,11 +180,15 @@ class DatabaseSeeder extends Seeder
             'subtotal' => 51.80,
         ]);
 
+        // Venda 2: Com desconto de 10% (R$ 15,48)
         $sale2 = Sale::create([
             'customer_id' => 4,
-            'total' => 154.80,
+            'subtotal' => 154.80,
+            'discount_percentage' => 10.00,
+            'discount_amount' => 15.48,
+            'total' => 139.32,
             'payment_method' => 'cartao_credito',
-            'notes' => 'Parcelado em 3x',
+            'notes' => 'Parcelado em 3x - Desconto de 10%',
         ]);
 
         $sale2->items()->create([
@@ -200,10 +212,29 @@ class DatabaseSeeder extends Seeder
             'subtotal' => 19.90,
         ]);
 
+        // Venda 3: Com desconto fixo de R$ 20,00
+        $sale3 = Sale::create([
+            'customer_id' => 1,
+            'subtotal' => 120.00,
+            'discount_percentage' => 16.67,
+            'discount_amount' => 20.00,
+            'total' => 100.00,
+            'payment_method' => 'dinheiro',
+            'notes' => 'Desconto de R$ 20,00 - Cliente fiel',
+        ]);
+
+        $sale3->items()->create([
+            'product_id' => 5, // Suporte Veicular
+            'quantity' => 4,
+            'unit_price' => 30.00,
+            'subtotal' => 120.00,
+        ]);
+
         // Atualizar estoque
-        Product::find(1)->decrement('stock', 2);
-        Product::find(2)->decrement('stock', 1);
-        Product::find(3)->decrement('stock', 1);
-        Product::find(4)->decrement('stock', 1);
+        Product::find(1)->decrement('stock', 2); // Película: 2
+        Product::find(2)->decrement('stock', 1); // Capa: 1
+        Product::find(3)->decrement('stock', 1); // Carregador: 1
+        Product::find(4)->decrement('stock', 1); // Fone Bluetooth: 1
+        Product::find(5)->decrement('stock', 4); // Suporte Veicular: 4
     }
 }

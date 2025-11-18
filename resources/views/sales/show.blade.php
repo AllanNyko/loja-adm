@@ -4,6 +4,13 @@
 @section('page-title', 'Venda #' . $sale->id)
 
 @section('content')
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>Detalhes da Venda #{{ $sale->id }}</h4>
+    <a href="{{ route('sales.export-pdf', $sale) }}" class="btn btn-danger">
+        <i class="bi bi-file-pdf"></i> Exportar Comprovante
+    </a>
+</div>
+
 <div class="row">
     <div class="col-md-8">
         <div class="card mb-3">
@@ -48,6 +55,18 @@
                         </tbody>
                         <tfoot>
                             <tr>
+                                <th colspan="3" class="text-end">Subtotal:</th>
+                                <th>R$ {{ number_format($sale->subtotal, 2, ',', '.') }}</th>
+                            </tr>
+                            @if($sale->discount_amount > 0)
+                            <tr>
+                                <th colspan="3" class="text-end">
+                                    Desconto ({{ number_format($sale->discount_percentage, 2, ',', '.') }}%):
+                                </th>
+                                <th class="text-danger">- R$ {{ number_format($sale->discount_amount, 2, ',', '.') }}</th>
+                            </tr>
+                            @endif
+                            <tr class="table-success">
                                 <th colspan="3" class="text-end">Total:</th>
                                 <th>R$ {{ number_format($sale->total, 2, ',', '.') }}</th>
                             </tr>

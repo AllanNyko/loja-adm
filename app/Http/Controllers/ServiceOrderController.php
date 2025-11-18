@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ServiceOrder;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ServiceOrderController extends Controller
 {
@@ -34,6 +35,7 @@ class ServiceOrderController extends Controller
             'device_model' => 'required|string|max:255',
             'device_imei' => 'nullable|string|max:255',
             'problem_description' => 'required|string',
+            'price' => 'required|numeric|min:0',
             'diagnostic' => 'nullable|string',
             'estimated_cost' => 'nullable|numeric|min:0',
             'deadline' => 'nullable|date',
@@ -65,6 +67,7 @@ class ServiceOrderController extends Controller
             'device_model' => 'required|string|max:255',
             'device_imei' => 'nullable|string|max:255',
             'problem_description' => 'required|string',
+            'price' => 'required|numeric|min:0',
             'diagnostic' => 'nullable|string',
             'estimated_cost' => 'nullable|numeric|min:0',
             'final_cost' => 'nullable|numeric|min:0',
@@ -97,5 +100,16 @@ class ServiceOrderController extends Controller
 
         return redirect()->back()
             ->with('success', 'Status atualizado com sucesso!');
+    }
+
+    public function exportPdf(ServiceOrder $serviceOrder)
+    {
+        $serviceOrder->load('customer');
+        
+        $pdf = Pdf::loadView('service-orders.pdf', [
+            'order' => $serviceOrder,
+        ]);
+
+        return $pdf->download('ordem-servico-' . $serviceOrder->id . '.pdf');
     }
 }
