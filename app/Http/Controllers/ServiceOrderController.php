@@ -11,25 +11,17 @@ class ServiceOrderController extends Controller
 {
     public function index(Request $request)
     {
-        \Log::info('ServiceOrder Index - Parâmetros:', [
-            'search' => $request->search,
-            'status' => $request->status,
-            'filled_search' => $request->filled('search'),
-        ]);
-
         $query = ServiceOrder::with('customer')->orderBy('created_at', 'desc');
 
         // Filtro por status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
-            \Log::info('Filtro status aplicado:', ['status' => $request->status]);
         }
 
         // Filtro por busca (nome do cliente ou documento)
         if ($request->filled('search')) {
             $search = trim($request->search);
             if ($search !== '') {
-                \Log::info('Filtro busca aplicado:', ['search' => $search]);
                 $query->where(function($q) use ($search) {
                     $q->whereHas('customer', function($customerQuery) use ($search) {
                         $customerQuery->where('name', 'like', '%' . $search . '%');
@@ -40,8 +32,6 @@ class ServiceOrderController extends Controller
         }
 
         $serviceOrders = $query->paginate(15);
-        
-        \Log::info('Resultado da busca:', ['total' => $serviceOrders->total()]);
         
         return view('service-orders.index', compact('serviceOrders'));
     }
@@ -94,6 +84,8 @@ class ServiceOrderController extends Controller
             'problem_description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'parts_cost' => 'nullable|numeric|min:0',
+            'extra_cost_type' => 'nullable|string|max:50',
+            'extra_cost_value' => 'nullable|numeric|min:0',
             'discount_type' => 'nullable|in:percentage,amount',
             'discount_value' => 'nullable|numeric|min:0',
             'diagnostic' => 'nullable|string',
@@ -101,6 +93,20 @@ class ServiceOrderController extends Controller
             'deadline' => 'nullable|date',
             'notes' => 'nullable|string',
         ]);
+
+        // Calcular final_cost
+        $subtotal = ($validated['price'] ?? 0) + ($validated['parts_cost'] ?? 0) + ($validated['extra_cost_value'] ?? 0);
+        
+        $discountAmount = 0;
+        if (isset($validated['discount_value']) && $validated['discount_value'] > 0) {
+            if (($validated['discount_type'] ?? 'amount') === 'percentage') {
+                $discountAmount = ($subtotal * $validated['discount_value']) / 100;
+            } else {
+                $discountAmount = $validated['discount_value'];
+            }
+        }
+        
+        $validated['final_cost'] = $subtotal - $discountAmount;
 
         ServiceOrder::create($validated);
 
@@ -130,6 +136,8 @@ class ServiceOrderController extends Controller
             'problem_description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'parts_cost' => 'nullable|numeric|min:0',
+            'extra_cost_type' => 'nullable|string|max:50',
+            'extra_cost_value' => 'nullable|numeric|min:0',
             'discount_type' => 'nullable|in:percentage,amount',
             'discount_value' => 'nullable|numeric|min:0',
             'diagnostic' => 'nullable|string',

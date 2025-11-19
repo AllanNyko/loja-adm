@@ -24,10 +24,17 @@ class DashboardController extends Controller
                 ->whereMonth('created_at', $month)
                 ->sum('total');
             
+            // Para OS concluídas, calcular lucro real: final_cost - parts_cost - extra_cost_value
             $orders = ServiceOrder::whereYear('created_at', $currentYear)
                 ->whereMonth('created_at', $month)
                 ->where('status', 'completed')
-                ->sum('price');
+                ->get()
+                ->sum(function($order) {
+                    $finalCost = $order->final_cost ?? $order->price ?? 0;
+                    $partsCost = $order->parts_cost ?? 0;
+                    $extraCost = $order->extra_cost_value ?? 0;
+                    return $finalCost - $partsCost - $extraCost;
+                });
             
             $expenses = Expense::whereYear('created_at', $currentYear)
                 ->whereMonth('created_at', $month)
@@ -44,10 +51,17 @@ class DashboardController extends Controller
             ->whereYear('created_at', now()->year)
             ->sum('total');
             
+        // Lucro real das OS (final_cost - parts_cost - extra_cost)
         $currentMonthOrders = ServiceOrder::whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->where('status', 'completed')
-            ->sum('price');
+            ->get()
+            ->sum(function($order) {
+                $finalCost = $order->final_cost ?? $order->price ?? 0;
+                $partsCost = $order->parts_cost ?? 0;
+                $extraCost = $order->extra_cost_value ?? 0;
+                return $finalCost - $partsCost - $extraCost;
+            });
         
         // Despesas do mês atual
         $currentMonthExpenses = Expense::whereMonth('created_at', now()->month)
@@ -62,9 +76,17 @@ class DashboardController extends Controller
         
         // Faturamento do dia (lucro bruto - despesas do dia)
         $todaySales = Sale::whereDate('created_at', today())->sum('total');
+        
         $todayOrders = ServiceOrder::whereDate('created_at', today())
             ->where('status', 'completed')
-            ->sum('price');
+            ->get()
+            ->sum(function($order) {
+                $finalCost = $order->final_cost ?? $order->price ?? 0;
+                $partsCost = $order->parts_cost ?? 0;
+                $extraCost = $order->extra_cost_value ?? 0;
+                return $finalCost - $partsCost - $extraCost;
+            });
+            
         $todayExpenses = Expense::whereDate('created_at', today())
             ->where('status', 'paid')
             ->sum('amount');

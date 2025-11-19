@@ -87,7 +87,7 @@
                                 <span class="d-md-none">{{ substr($order->status_label, 0, 3) }}</span>
                             </span>
                         </td>
-                        <td class="d-none d-lg-table-cell">R$ {{ number_format($order->price ?? 0, 2, ',', '.') }}</td>
+                        <td class="d-none d-lg-table-cell">R$ {{ number_format($order->final_cost ?? $order->price ?? 0, 2, ',', '.') }}</td>
                         <td class="text-end px-2">
                             <div class="btn-group btn-group-sm">
                                 <a href="{{ route('service-orders.show', $order) }}" class="btn btn-info btn-sm" title="Ver">

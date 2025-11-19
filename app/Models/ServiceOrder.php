@@ -15,6 +15,8 @@ class ServiceOrder extends Model
         'problem_description',
         'price',
         'parts_cost',
+        'extra_cost_type',
+        'extra_cost_value',
         'discount_type',
         'discount_value',
         'diagnostic',
@@ -28,6 +30,7 @@ class ServiceOrder extends Model
     protected $casts = [
         'price' => 'decimal:2',
         'parts_cost' => 'decimal:2',
+        'extra_cost_value' => 'decimal:2',
         'discount_value' => 'decimal:2',
         'estimated_cost' => 'decimal:2',
         'final_cost' => 'decimal:2',

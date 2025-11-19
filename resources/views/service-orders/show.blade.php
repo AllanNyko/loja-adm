@@ -48,19 +48,67 @@
                 </div>
                 @endif
 
+                <hr>
+                
+                <!-- Detalhamento de Valores -->
+                <div class="mb-3">
+                    <strong>Valores do Serviço:</strong>
+                    <table class="table table-sm mt-2">
+                        <tr>
+                            <td>Mão de Obra:</td>
+                            <td class="text-end">R$ {{ number_format($serviceOrder->price ?? 0, 2, ',', '.') }}</td>
+                        </tr>
+                        @if($serviceOrder->parts_cost && $serviceOrder->parts_cost > 0)
+                        <tr>
+                            <td>Peças:</td>
+                            <td class="text-end">R$ {{ number_format($serviceOrder->parts_cost, 2, ',', '.') }}</td>
+                        </tr>
+                        @endif
+                        @if($serviceOrder->extra_cost_value && $serviceOrder->extra_cost_value > 0)
+                        <tr>
+                            <td>{{ ucfirst($serviceOrder->extra_cost_type ?? 'Custo Extra') }}:</td>
+                            <td class="text-end">R$ {{ number_format($serviceOrder->extra_cost_value, 2, ',', '.') }}</td>
+                        </tr>
+                        @endif
+                        @php
+                            $subtotal = ($serviceOrder->price ?? 0) + ($serviceOrder->parts_cost ?? 0) + ($serviceOrder->extra_cost_value ?? 0);
+                            $discountAmount = 0;
+                            if ($serviceOrder->discount_value > 0) {
+                                if ($serviceOrder->discount_type === 'percentage') {
+                                    $discountAmount = ($subtotal * $serviceOrder->discount_value) / 100;
+                                } else {
+                                    $discountAmount = $serviceOrder->discount_value;
+                                }
+                            }
+                        @endphp
+                        @if($discountAmount > 0)
+                        <tr>
+                            <td colspan="2"><hr class="my-1"></td>
+                        </tr>
+                        <tr>
+                            <td>Subtotal:</td>
+                            <td class="text-end">R$ {{ number_format($subtotal, 2, ',', '.') }}</td>
+                        </tr>
+                        <tr class="text-danger">
+                            <td>Desconto ({{ $serviceOrder->discount_type === 'percentage' ? $serviceOrder->discount_value . '%' : 'R$ ' . number_format($serviceOrder->discount_value, 2, ',', '.') }}):</td>
+                            <td class="text-end">- R$ {{ number_format($discountAmount, 2, ',', '.') }}</td>
+                        </tr>
+                        @endif
+                        <tr>
+                            <td colspan="2"><hr class="my-1"></td>
+                        </tr>
+                        <tr class="fw-bold fs-5">
+                            <td>Total a Pagar:</td>
+                            <td class="text-end text-primary">R$ {{ number_format($serviceOrder->final_cost ?? ($subtotal - $discountAmount), 2, ',', '.') }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <hr>
+
                 <div class="row mb-3">
-                    <div class="col-md-4">
-                        <strong>Custo Estimado:</strong><br>
-                        R$ {{ number_format($serviceOrder->estimated_cost ?? 0, 2, ',', '.') }}
-                    </div>
-                    @if($serviceOrder->final_cost)
-                    <div class="col-md-4">
-                        <strong>Custo Final:</strong><br>
-                        R$ {{ number_format($serviceOrder->final_cost, 2, ',', '.') }}
-                    </div>
-                    @endif
-                    <div class="col-md-4">
-                        <strong>Prazo:</strong><br>
+                    <div class="col-md-6">
+                        <strong>Prazo de Entrega:</strong><br>
                         {{ $serviceOrder->deadline?->format('d/m/Y') ?? 'Não definido' }}
                     </div>
                 </div>

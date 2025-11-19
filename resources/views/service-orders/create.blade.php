@@ -132,6 +132,30 @@
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="extra_cost_type" class="form-label fw-bold">Tipo de Custo Extra</label>
+                            <select name="extra_cost_type" id="extra_cost_type" class="form-select form-select-lg">
+                                <option value="">Nenhum</option>
+                                <option value="motoboy" {{ old('extra_cost_type') == 'motoboy' ? 'selected' : '' }}>Motoboy</option>
+                                <option value="frete" {{ old('extra_cost_type') == 'frete' ? 'selected' : '' }}>Frete</option>
+                                <option value="outro" {{ old('extra_cost_type') == 'outro' ? 'selected' : '' }}>Outro</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-6 mb-3">
+                            <label for="extra_cost_value" class="form-label fw-bold">Valor do Custo Extra</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text">R$</span>
+                                <input type="number" step="0.01" name="extra_cost_value" id="extra_cost_value" class="form-control @error('extra_cost_value') is-invalid @enderror" value="{{ old('extra_cost_value', '0.00') }}" placeholder="0.00">
+                            </div>
+                            @error('extra_cost_value')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">Ex: taxa de motoboy, frete, etc.</small>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label for="diagnostic" class="form-label fw-bold">Diagnóstico Técnico</label>
                         <textarea name="diagnostic" id="diagnostic" rows="3" class="form-control form-control-lg @error('diagnostic') is-invalid @enderror" placeholder="Opcional - Diagnóstico após análise">{{ old('diagnostic') }}</textarea>
@@ -150,7 +174,7 @@
                             @error('estimated_cost')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            <small class="text-muted">Calculado automaticamente (Mão de Obra + Peças)</small>
+                            <small class="text-muted">Calculado automaticamente (Mão de Obra + Peças + Custo Extra)</small>
                         </div>
 
                         <div class="col-12 col-md-6 mb-3">
@@ -331,6 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cálculo automático do custo estimado total
     const priceInput = document.getElementById('price');
     const partsCostInput = document.getElementById('parts_cost');
+    const extraCostValueInput = document.getElementById('extra_cost_value');
     const estimatedCostInput = document.getElementById('estimated_cost');
     const discountTypeSelect = document.getElementById('discount_type');
     const discountValueInput = document.getElementById('discount_value');
@@ -339,10 +364,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalDisplay = document.getElementById('total_display');
     
     function calculateTotals() {
-        // Calcular subtotal (mão de obra + peças)
+        // Calcular subtotal (mão de obra + peças + custo extra)
         const price = parseFloat(priceInput.value) || 0;
         const partsCost = parseFloat(partsCostInput.value) || 0;
-        const subtotal = price + partsCost;
+        const extraCost = parseFloat(extraCostValueInput.value) || 0;
+        const subtotal = price + partsCost + extraCost;
         
         // Atualizar custo estimado
         estimatedCostInput.value = subtotal.toFixed(2);
@@ -372,6 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Adicionar listeners para atualizar em tempo real
     priceInput.addEventListener('input', calculateTotals);
     partsCostInput.addEventListener('input', calculateTotals);
+    extraCostValueInput.addEventListener('input', calculateTotals);
     discountTypeSelect.addEventListener('change', calculateTotals);
     discountValueInput.addEventListener('input', calculateTotals);
     

@@ -44,22 +44,38 @@ class ReportController extends Controller
             ->whereMonth('created_at', $date->month)
             ->sum('total');
             
-        $orders = ServiceOrder::whereYear('created_at', $date->year)
+        // Total cobrado das OS concluídas
+        $ordersFinalCost = ServiceOrder::whereYear('created_at', $date->year)
             ->whereMonth('created_at', $date->month)
             ->where('status', 'completed')
-            ->sum('price');
+            ->sum('final_cost');
+            
+        // Custos das OS (peças + extra)
+        $ordersCosts = ServiceOrder::whereYear('created_at', $date->year)
+            ->whereMonth('created_at', $date->month)
+            ->where('status', 'completed')
+            ->get()
+            ->sum(function($order) {
+                return ($order->parts_cost ?? 0) + ($order->extra_cost_value ?? 0);
+            });
             
         $expenses = Expense::whereYear('created_at', $date->year)
             ->whereMonth('created_at', $date->month)
             ->where('status', 'paid')
             ->sum('amount');
         
+        // Faturamento Bruto = Vendas + Final Cost OS
+        $revenue = $sales + $ordersFinalCost;
+        
+        // Faturamento Líquido = Faturamento Bruto - Custos OS - Despesas
+        $netRevenue = $revenue - $ordersCosts - $expenses;
+        
         $monthTotal = [
             'sales' => $sales,
-            'orders' => $orders,
+            'orders' => $ordersFinalCost,
             'expenses' => $expenses,
-            'revenue' => $sales + $orders,
-            'net_revenue' => ($sales + $orders) - $expenses,
+            'revenue' => $revenue,
+            'net_revenue' => $netRevenue,
         ];
         $monthTotal['total'] = $monthTotal['revenue'];
 
@@ -84,9 +100,18 @@ class ReportController extends Controller
             $days[] = $date->format('d/m');
 
             $salesData[] = Sale::whereDate('created_at', $date)->sum('total');
-            $ordersData[] = ServiceOrder::whereDate('created_at', $date)
+            
+            // Lucro das OS = final_cost - (parts_cost + extra_cost)
+            $ordersProfit = ServiceOrder::whereDate('created_at', $date)
                 ->where('status', 'completed')
-                ->sum('price');
+                ->get()
+                ->sum(function($order) {
+                    $finalCost = $order->final_cost ?? 0;
+                    $costs = ($order->parts_cost ?? 0) + ($order->extra_cost_value ?? 0);
+                    return $finalCost - $costs;
+                });
+            
+            $ordersData[] = $ordersProfit;
         }
 
         return [
@@ -110,10 +135,18 @@ class ReportController extends Controller
                 ->whereMonth('created_at', $date->month)
                 ->sum('total');
             
-            $ordersData[] = ServiceOrder::whereYear('created_at', $date->year)
+            // Lucro das OS = final_cost - (parts_cost + extra_cost)
+            $ordersProfit = ServiceOrder::whereYear('created_at', $date->year)
                 ->whereMonth('created_at', $date->month)
                 ->where('status', 'completed')
-                ->sum('price');
+                ->get()
+                ->sum(function($order) {
+                    $finalCost = $order->final_cost ?? 0;
+                    $costs = ($order->parts_cost ?? 0) + ($order->extra_cost_value ?? 0);
+                    return $finalCost - $costs;
+                });
+            
+            $ordersData[] = $ordersProfit;
         }
 
         return [
@@ -127,27 +160,47 @@ class ReportController extends Controller
     {
         $now = Carbon::now();
         
+        // Vendas de acessórios
         $sales = Sale::whereYear('created_at', $now->year)
             ->whereMonth('created_at', $now->month)
             ->sum('total');
             
-        $orders = ServiceOrder::whereYear('created_at', $now->year)
+        // Total cobrado das OS concluídas (final_cost)
+        $ordersFinalCost = ServiceOrder::whereYear('created_at', $now->year)
             ->whereMonth('created_at', $now->month)
             ->where('status', 'completed')
-            ->sum('price');
+            ->sum('final_cost');
+            
+        // Custos das OS (peças + extra)
+        $ordersCosts = ServiceOrder::whereYear('created_at', $now->year)
+            ->whereMonth('created_at', $now->month)
+            ->where('status', 'completed')
+            ->get()
+            ->sum(function($order) {
+                return ($order->parts_cost ?? 0) + ($order->extra_cost_value ?? 0);
+            });
             
         $expenses = Expense::whereYear('created_at', $now->year)
             ->whereMonth('created_at', $now->month)
             ->where('status', 'paid')
             ->sum('amount');
         
+        // Faturamento Bruto = Vendas + Final Cost das OS (sem descontar nada)
+        $revenue = $sales + $ordersFinalCost;
+        
+        // Lucro das OS = Final Cost - Custos
+        $ordersProfit = $ordersFinalCost - $ordersCosts;
+        
+        // Faturamento Líquido = Faturamento Bruto - Custos das OS - Despesas
+        $netRevenue = $revenue - $ordersCosts - $expenses;
+        
         return [
             'month' => $now->format('F/Y'),
             'sales' => $sales,
-            'orders' => $orders,
+            'orders' => $ordersProfit,  // Lucro real das OS (final_cost - custos)
             'expenses' => $expenses,
-            'revenue' => $sales + $orders,
-            'net_revenue' => ($sales + $orders) - $expenses,
+            'revenue' => $revenue,
+            'net_revenue' => $netRevenue,
         ];
     }
 
@@ -160,9 +213,11 @@ class ReportController extends Controller
             $currentDate = Carbon::create($date->year, $date->month, $day);
             
             $sales = Sale::whereDate('created_at', $currentDate)->sum('total');
+            
+            // Total final_cost das OS concluídas (valor cobrado do cliente)
             $orders = ServiceOrder::whereDate('created_at', $currentDate)
                 ->where('status', 'completed')
-                ->sum('price');
+                ->sum('final_cost');
             
             $dailyData[] = [
                 'day' => $day,
@@ -194,17 +249,27 @@ class ReportController extends Controller
                 ->whereMonth('created_at', $month)
                 ->sum('total');
             
-            $orders = ServiceOrder::whereYear('created_at', $currentYear)
+            // Total cobrado das OS concluídas
+            $ordersFinalCost = ServiceOrder::whereYear('created_at', $currentYear)
                 ->whereMonth('created_at', $month)
                 ->where('status', 'completed')
-                ->sum('price');
+                ->sum('final_cost');
+            
+            // Custos das OS (peças + extra)
+            $ordersCosts = ServiceOrder::whereYear('created_at', $currentYear)
+                ->whereMonth('created_at', $month)
+                ->where('status', 'completed')
+                ->get()
+                ->sum(function($order) {
+                    return ($order->parts_cost ?? 0) + ($order->extra_cost_value ?? 0);
+                });
             
             $expenses = Expense::whereYear('created_at', $currentYear)
                 ->whereMonth('created_at', $month)
                 ->sum('amount');
             
-            // Faturamento Líquido = (Vendas + OS) - Despesas
-            $netRevenue = ($sales + $orders) - $expenses;
+            // Faturamento Líquido = (Vendas + Final Cost OS) - Custos OS - Despesas
+            $netRevenue = ($sales + $ordersFinalCost) - $ordersCosts - $expenses;
             $monthlyRevenue[] = $netRevenue;
             $totalRevenue += $netRevenue;
         }
