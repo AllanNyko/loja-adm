@@ -154,6 +154,10 @@
                 <p>{{ $order->customer->name }}</p>
             </div>
             <div class="info-item">
+                <label>CPF/CNPJ:</label>
+                <p>{{ $order->customer_document ?? 'Não informado' }}</p>
+            </div>
+            <div class="info-item">
                 <label>Telefone:</label>
                 <p>{{ $order->customer->phone }}</p>
             </div>
@@ -164,7 +168,7 @@
             </div>
             @endif
             @if($order->customer->address)
-            <div class="info-item {{ $order->customer->email ? '' : 'full-width' }}">
+            <div class="info-item {{ $order->customer->email ? 'full-width' : '' }}">
                 <label>Endereço:</label>
                 <p>{{ $order->customer->address }}</p>
             </div>
@@ -215,18 +219,6 @@
                 <p>{{ $order->diagnostic }}</p>
             </div>
             @endif
-            @if($order->estimated_cost)
-            <div class="info-item">
-                <label>Custo Estimado:</label>
-                <p>R$ {{ number_format($order->estimated_cost, 2, ',', '.') }}</p>
-            </div>
-            @endif
-            @if($order->final_cost)
-            <div class="info-item">
-                <label>Custo Final:</label>
-                <p>R$ {{ number_format($order->final_cost, 2, ',', '.') }}</p>
-            </div>
-            @endif
             @if($order->notes)
             <div class="info-item full-width">
                 <label>Observações:</label>
@@ -236,12 +228,74 @@
         </div>
     </div>
 
-    @if($order->price)
-    <div class="price-box">
-        <h3>VALOR DO SERVIÇO</h3>
-        <p>R$ {{ number_format($order->price, 2, ',', '.') }}</p>
+    <div class="order-info">
+        <h2>Valores do Serviço</h2>
+        <div class="info-grid">
+            @if($order->price)
+            <div class="info-item">
+                <label>Mão de Obra:</label>
+                <p>R$ {{ number_format($order->price, 2, ',', '.') }}</p>
+            </div>
+            @endif
+            @if($order->parts_cost)
+            <div class="info-item">
+                <label>Valor das Peças:</label>
+                <p>R$ {{ number_format($order->parts_cost, 2, ',', '.') }}</p>
+            </div>
+            @endif
+            @if($order->discount_value && $order->discount_value > 0)
+            <div class="info-item">
+                <label>Desconto Aplicado:</label>
+                <p>
+                    @if($order->discount_type === 'percentage')
+                        {{ number_format($order->discount_value, 2, ',', '.') }}%
+                    @else
+                        R$ {{ number_format($order->discount_value, 2, ',', '.') }}
+                    @endif
+                </p>
+            </div>
+            @endif
+            @if($order->estimated_cost)
+            <div class="info-item">
+                <label>Custo Estimado Total:</label>
+                <p><strong>R$ {{ number_format($order->estimated_cost, 2, ',', '.') }}</strong></p>
+            </div>
+            @endif
+            @if($order->final_cost)
+            <div class="info-item">
+                <label>Custo Final:</label>
+                <p><strong style="color: #198754;">R$ {{ number_format($order->final_cost, 2, ',', '.') }}</strong></p>
+            </div>
+            @endif
+        </div>
     </div>
-    @endif
+
+    @php
+        // Calcular valor total com desconto para exibir no box
+        $subtotal = ($order->price ?? 0) + ($order->parts_cost ?? 0);
+        $discountAmount = 0;
+        
+        if ($order->discount_value && $order->discount_value > 0) {
+            if ($order->discount_type === 'percentage') {
+                $discountAmount = ($subtotal * $order->discount_value) / 100;
+            } else {
+                $discountAmount = min($order->discount_value, $subtotal);
+            }
+        }
+        
+        $totalWithDiscount = $subtotal - $discountAmount;
+        $displayValue = $order->final_cost ?? $totalWithDiscount;
+    @endphp
+
+    <div class="price-box">
+        <h3>VALOR {{ $order->final_cost ? 'FINAL' : 'TOTAL' }} DO SERVIÇO</h3>
+        <p>R$ {{ number_format($displayValue, 2, ',', '.') }}</p>
+        @if($discountAmount > 0 && !$order->final_cost)
+            <small style="font-size: 11px; opacity: 0.9;">
+                (Subtotal: R$ {{ number_format($subtotal, 2, ',', '.') }} - Desconto: R$ {{ number_format($discountAmount, 2, ',', '.') }})
+            </small>
+        @endif
+    </div>
 
     <div class="signature-section">
         <div class="signature-box">

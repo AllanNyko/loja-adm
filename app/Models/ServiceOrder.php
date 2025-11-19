@@ -9,10 +9,14 @@ class ServiceOrder extends Model
 {
     protected $fillable = [
         'customer_id',
+        'customer_document',
         'device_model',
         'device_imei',
         'problem_description',
         'price',
+        'parts_cost',
+        'discount_type',
+        'discount_value',
         'diagnostic',
         'estimated_cost',
         'final_cost',
@@ -23,6 +27,8 @@ class ServiceOrder extends Model
 
     protected $casts = [
         'price' => 'decimal:2',
+        'parts_cost' => 'decimal:2',
+        'discount_value' => 'decimal:2',
         'estimated_cost' => 'decimal:2',
         'final_cost' => 'decimal:2',
         'deadline' => 'date',

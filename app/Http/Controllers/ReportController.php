@@ -46,6 +46,7 @@ class ReportController extends Controller
             
         $orders = ServiceOrder::whereYear('created_at', $date->year)
             ->whereMonth('created_at', $date->month)
+            ->where('status', 'completed')
             ->sum('price');
             
         $expenses = Expense::whereYear('created_at', $date->year)
@@ -184,7 +185,7 @@ class ReportController extends Controller
         $monthlyRevenue = [];
         $totalRevenue = 0;
         
-        // Calcular faturamento de janeiro até mês atual
+        // Calcular faturamento líquido de janeiro até mês atual
         for ($month = 1; $month <= $currentMonth; $month++) {
             $date = Carbon::create($currentYear, $month, 1);
             $months[] = $date->format('M/y');
@@ -198,12 +199,17 @@ class ReportController extends Controller
                 ->where('status', 'completed')
                 ->sum('price');
             
-            $revenue = $sales + $orders;
-            $monthlyRevenue[] = $revenue;
-            $totalRevenue += $revenue;
+            $expenses = Expense::whereYear('created_at', $currentYear)
+                ->whereMonth('created_at', $month)
+                ->sum('amount');
+            
+            // Faturamento Líquido = (Vendas + OS) - Despesas
+            $netRevenue = ($sales + $orders) - $expenses;
+            $monthlyRevenue[] = $netRevenue;
+            $totalRevenue += $netRevenue;
         }
         
-        // Calcular média
+        // Calcular média do faturamento líquido
         $average = $currentMonth > 0 ? $totalRevenue / $currentMonth : 0;
         $averageLine = array_fill(0, $currentMonth, $average);
         

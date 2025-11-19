@@ -11,13 +11,37 @@ class ServiceOrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = ServiceOrder::with('customer')->latest();
+        \Log::info('ServiceOrder Index - Parâmetros:', [
+            'search' => $request->search,
+            'status' => $request->status,
+            'filled_search' => $request->filled('search'),
+        ]);
 
-        if ($request->has('status') && $request->status !== '') {
+        $query = ServiceOrder::with('customer')->orderBy('created_at', 'desc');
+
+        // Filtro por status
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
+            \Log::info('Filtro status aplicado:', ['status' => $request->status]);
+        }
+
+        // Filtro por busca (nome do cliente ou documento)
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            if ($search !== '') {
+                \Log::info('Filtro busca aplicado:', ['search' => $search]);
+                $query->where(function($q) use ($search) {
+                    $q->whereHas('customer', function($customerQuery) use ($search) {
+                        $customerQuery->where('name', 'like', '%' . $search . '%');
+                    })
+                    ->orWhere('customer_document', 'like', '%' . $search . '%');
+                });
+            }
         }
 
         $serviceOrders = $query->paginate(15);
+        
+        \Log::info('Resultado da busca:', ['total' => $serviceOrders->total()]);
         
         return view('service-orders.index', compact('serviceOrders'));
     }
@@ -25,17 +49,53 @@ class ServiceOrderController extends Controller
     public function create()
     {
         $customers = Customer::orderBy('name')->get();
-        return view('service-orders.create', compact('customers'));
+        $manufacturers = array_keys(config('devices'));
+        return view('service-orders.create', compact('customers', 'manufacturers'));
+    }
+    
+    public function searchDevices(Request $request)
+    {
+        $search = $request->get('q', '');
+        $devices = config('devices');
+        $results = [];
+        
+        if (strlen($search) >= 1) {
+            foreach ($devices as $manufacturer => $models) {
+                foreach ($models as $model) {
+                    if (stripos($model, $search) !== false) {
+                        $results[] = [
+                            'manufacturer' => $manufacturer,
+                            'model' => $model,
+                            'label' => $manufacturer . ' ' . $model
+                        ];
+                    }
+                }
+            }
+        }
+        
+        return response()->json(array_slice($results, 0, 20));
+    }
+    
+    public function getManufacturerModels($manufacturer)
+    {
+        $devices = config('devices');
+        $models = $devices[$manufacturer] ?? [];
+        
+        return response()->json($models);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
+            'customer_document' => 'required|string|max:20',
             'device_model' => 'required|string|max:255',
             'device_imei' => 'nullable|string|max:255',
             'problem_description' => 'required|string',
             'price' => 'required|numeric|min:0',
+            'parts_cost' => 'nullable|numeric|min:0',
+            'discount_type' => 'nullable|in:percentage,amount',
+            'discount_value' => 'nullable|numeric|min:0',
             'diagnostic' => 'nullable|string',
             'estimated_cost' => 'nullable|numeric|min:0',
             'deadline' => 'nullable|date',
@@ -64,10 +124,14 @@ class ServiceOrderController extends Controller
     {
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
+            'customer_document' => 'required|string|max:20',
             'device_model' => 'required|string|max:255',
             'device_imei' => 'nullable|string|max:255',
             'problem_description' => 'required|string',
             'price' => 'required|numeric|min:0',
+            'parts_cost' => 'nullable|numeric|min:0',
+            'discount_type' => 'nullable|in:percentage,amount',
+            'discount_value' => 'nullable|numeric|min:0',
             'diagnostic' => 'nullable|string',
             'estimated_cost' => 'nullable|numeric|min:0',
             'final_cost' => 'nullable|numeric|min:0',

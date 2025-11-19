@@ -21,6 +21,13 @@
                         <small class="text-muted">{{ $serviceOrder->customer->phone }}</small>
                     </div>
                     <div class="col-md-6">
+                        <strong>CPF/CNPJ:</strong><br>
+                        {{ $serviceOrder->customer_document ?? 'Não informado' }}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
                         <strong>Dispositivo:</strong><br>
                         {{ $serviceOrder->device_model }}
                         @if($serviceOrder->device_imei)

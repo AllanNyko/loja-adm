@@ -16,7 +16,8 @@
                         <label for="customer_id" class="form-label">Cliente *</label>
                         <select name="customer_id" id="customer_id" class="form-select @error('customer_id') is-invalid @enderror" required>
                             @foreach($customers as $customer)
-                                <option value="{{ $customer->id }}" {{ old('customer_id', $serviceOrder->customer_id) == $customer->id ? 'selected' : '' }}>
+                                <option value="{{ $customer->id }}" 
+                                        {{ old('customer_id', $serviceOrder->customer_id) == $customer->id ? 'selected' : '' }}>
                                     {{ $customer->name }} - {{ $customer->phone }}
                                 </option>
                             @endforeach
@@ -24,6 +25,20 @@
                         @error('customer_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="customer_document" class="form-label">CPF/CNPJ do Cliente *</label>
+                        <input type="text" name="customer_document" id="customer_document" 
+                               class="form-control @error('customer_document') is-invalid @enderror" 
+                               value="{{ old('customer_document', $serviceOrder->customer_document) }}" 
+                               placeholder="000.000.000-00 ou 00.000.000/0000-00" 
+                               required 
+                               maxlength="20">
+                        @error('customer_document')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">CPF ou CNPJ do cliente para vinculação jurídica do aparelho</small>
                     </div>
 
                     <div class="row">
@@ -131,3 +146,4 @@
     </div>
 </div>
 @endsection
+

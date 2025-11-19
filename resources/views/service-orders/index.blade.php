@@ -13,22 +13,34 @@
 
 <div class="card">
     <div class="card-body">
-        <form method="GET" class="row g-2 mb-3">
-            <div class="col-9 col-md-3">
-                <select name="status" class="form-select">
-                    <option value="">Todos os status</option>
-                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Aguardando</option>
-                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Aprovada</option>
-                    <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>Em Execução</option>
-                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Concluída</option>
-                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelada</option>
-                </select>
-            </div>
-            <div class="col-3 col-md-2">
-                <button type="submit" class="btn btn-secondary w-100">
-                    <i class="bi bi-funnel d-md-none"></i>
-                    <span class="d-none d-md-inline">Filtrar</span>
-                </button>
+        <form method="GET" class="mb-3">
+            <div class="row g-2">
+                <div class="col-12 col-md-5">
+                    <input type="text" name="search" class="form-control" placeholder="Buscar por nome do cliente ou documento..." value="{{ request('search') }}">
+                </div>
+                <div class="col-9 col-md-4">
+                    <select name="status" class="form-select">
+                        <option value="">Todos os status</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Aguardando</option>
+                        <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Aprovada</option>
+                        <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>Em Execução</option>
+                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Concluída</option>
+                        <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelada</option>
+                    </select>
+                </div>
+                <div class="col-3 col-md-3">
+                    <div class="d-flex gap-1">
+                        <button type="submit" class="btn btn-secondary w-100">
+                            <i class="bi bi-search d-md-none"></i>
+                            <span class="d-none d-md-inline"><i class="bi bi-search"></i> Buscar</span>
+                        </button>
+                        @if(request('search') || request('status'))
+                        <a href="{{ route('service-orders.index') }}" class="btn btn-outline-secondary" title="Limpar filtros">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                        @endif
+                    </div>
+                </div>
             </div>
         </form>
 
@@ -100,7 +112,7 @@
         </div>
 
         <div class="d-flex justify-content-center mt-3">
-            {{ $serviceOrders->links() }}
+            {{ $serviceOrders->appends(request()->query())->links() }}
         </div>
     </div>
 </div>
