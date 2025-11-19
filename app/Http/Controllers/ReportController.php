@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ServiceOrder;
 use App\Models\Sale;
+use App\Models\Expense;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -39,15 +40,27 @@ class ReportController extends Controller
         $last6Months = $this->getLast6MonthsData();
         
         // Total do mês
+        $sales = Sale::whereYear('created_at', $date->year)
+            ->whereMonth('created_at', $date->month)
+            ->sum('total');
+            
+        $orders = ServiceOrder::whereYear('created_at', $date->year)
+            ->whereMonth('created_at', $date->month)
+            ->sum('price');
+            
+        $expenses = Expense::whereYear('created_at', $date->year)
+            ->whereMonth('created_at', $date->month)
+            ->where('status', 'paid')
+            ->sum('amount');
+        
         $monthTotal = [
-            'sales' => Sale::whereYear('created_at', $date->year)
-                ->whereMonth('created_at', $date->month)
-                ->sum('total'),
-            'orders' => ServiceOrder::whereYear('created_at', $date->year)
-                ->whereMonth('created_at', $date->month)
-                ->sum('price'),
+            'sales' => $sales,
+            'orders' => $orders,
+            'expenses' => $expenses,
+            'revenue' => $sales + $orders,
+            'net_revenue' => ($sales + $orders) - $expenses,
         ];
-        $monthTotal['total'] = $monthTotal['sales'] + $monthTotal['orders'];
+        $monthTotal['total'] = $monthTotal['revenue'];
 
         $pdf = Pdf::loadView('reports.pdf', [
             'month' => $date->format('m/Y'),
@@ -113,15 +126,27 @@ class ReportController extends Controller
     {
         $now = Carbon::now();
         
+        $sales = Sale::whereYear('created_at', $now->year)
+            ->whereMonth('created_at', $now->month)
+            ->sum('total');
+            
+        $orders = ServiceOrder::whereYear('created_at', $now->year)
+            ->whereMonth('created_at', $now->month)
+            ->where('status', 'completed')
+            ->sum('price');
+            
+        $expenses = Expense::whereYear('created_at', $now->year)
+            ->whereMonth('created_at', $now->month)
+            ->where('status', 'paid')
+            ->sum('amount');
+        
         return [
             'month' => $now->format('F/Y'),
-            'sales' => Sale::whereYear('created_at', $now->year)
-                ->whereMonth('created_at', $now->month)
-                ->sum('total'),
-            'orders' => ServiceOrder::whereYear('created_at', $now->year)
-                ->whereMonth('created_at', $now->month)
-                ->where('status', 'completed')
-                ->sum('price'),
+            'sales' => $sales,
+            'orders' => $orders,
+            'expenses' => $expenses,
+            'revenue' => $sales + $orders,
+            'net_revenue' => ($sales + $orders) - $expenses,
         ];
     }
 

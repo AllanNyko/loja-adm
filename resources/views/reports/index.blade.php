@@ -4,20 +4,9 @@
 @section('page-title', 'Relatórios e Gráficos')
 
 @section('content')
-<!-- Resumo do Mês Atual -->
-<div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Resumo de {{ $currentMonthSummary['month'] }}</h5>
-        <form action="{{ route('reports.export-pdf') }}" method="GET" class="d-inline">
-            <input type="hidden" name="month" value="{{ now()->format('Y-m') }}">
-            <button type="submit" class="btn btn-danger btn-mobile">
-                <i class="bi bi-file-pdf"></i> <span class="d-none d-sm-inline">Exportar PDF</span>
-            </button>
-        </form>
-    </div>
-    <div class="card-body">
+        <!-- Cards de Resumo -->
         <div class="row g-3">
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-lg-3 col-md-6">
                 <div class="card bg-light">
                     <div class="card-body text-center">
                         <h6 class="text-muted">Vendas de Acessórios</h6>
@@ -25,7 +14,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-lg-3 col-md-6">
                 <div class="card bg-light">
                     <div class="card-body text-center">
                         <h6 class="text-muted">Ordens de Serviço</h6>
@@ -33,17 +22,45 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-lg-3 col-md-6">
+                <div class="card bg-danger text-white">
+                    <div class="card-body text-center">
+                        <h6>Despesas Totais</h6>
+                        <h3>R$ {{ number_format($currentMonthSummary['expenses'], 2, ',', '.') }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-3 col-md-6">
                 <div class="card bg-primary text-white">
                     <div class="card-body text-center">
                         <h6>Faturamento Total</h6>
-                        <h3>R$ {{ number_format($currentMonthSummary['sales'] + $currentMonthSummary['orders'], 2, ',', '.') }}</h3>
+                        <h3>R$ {{ number_format($currentMonthSummary['revenue'], 2, ',', '.') }}</h3>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+
+        <!-- Card de Faturamento Líquido -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="card {{ $currentMonthSummary['net_revenue'] >= 0 ? 'bg-success' : 'bg-warning' }} text-white">
+                    <div class="card-body text-center">
+                        <h5 class="mb-2">
+                            <i class="bi bi-cash-coin"></i> Faturamento Líquido do Mês
+                        </h5>
+                        <h2 class="mb-0">R$ {{ number_format($currentMonthSummary['net_revenue'], 2, ',', '.') }}</h2>
+                        <small>
+                            (Faturamento Total - Despesas) 
+                            @if($currentMonthSummary['net_revenue'] >= 0)
+                                <i class="bi bi-arrow-up-circle"></i> Lucro
+                            @else
+                                <i class="bi bi-arrow-down-circle"></i> Prejuízo
+                            @endif
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 <!-- Gráfico de Tendência Mensal -->
 <div class="card mb-4">

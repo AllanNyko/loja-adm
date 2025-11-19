@@ -193,6 +193,9 @@
             <a class="nav-link {{ request()->routeIs('customers.*') ? 'active' : '' }}" href="{{ route('customers.index') }}">
                 <i class="bi bi-people"></i> Clientes
             </a>
+            <a class="nav-link {{ request()->routeIs('expenses.*') ? 'active' : '' }}" href="{{ route('expenses.index') }}">
+                <i class="bi bi-wallet2"></i> Despesas
+            </a>
         </nav>
     </div>
 

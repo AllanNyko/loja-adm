@@ -7,9 +7,29 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::latest()->paginate(15);
+        $query = Product::query();
+
+        // Filtro por categoria
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        // Ordenação
+        $sortField = $request->get('sort', 'created_at');
+        $sortDirection = $request->get('direction', 'desc');
+
+        // Validar campos de ordenação permitidos
+        $allowedSorts = ['created_at', 'price', 'stock', 'name'];
+        if (in_array($sortField, $allowedSorts)) {
+            $query->orderBy($sortField, $sortDirection);
+        } else {
+            $query->latest();
+        }
+
+        $products = $query->paginate(15)->withQueryString();
+        
         return view('products.index', compact('products'));
     }
 

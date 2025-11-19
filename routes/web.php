@@ -7,6 +7,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ExpenseController;
 
 // Rotas públicas - redireciona para login
 Route::get('/', function () {
@@ -42,6 +43,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Customers
     Route::resource('customers', CustomerController::class);
+
+    // Expenses
+    Route::resource('expenses', ExpenseController::class);
+    Route::post('expenses/{expense}/mark-as-paid', [ExpenseController::class, 'markAsPaid'])
+        ->name('expenses.mark-as-paid');
 });
 
 require __DIR__.'/auth.php';

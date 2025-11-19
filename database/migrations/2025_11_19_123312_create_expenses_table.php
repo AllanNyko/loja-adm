@@ -1,0 +1,46 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('expenses', function (Blueprint $table) {
+            $table->id();
+            $table->string('description');
+            $table->enum('category', [
+                'utilities',        // Luz, água, gás
+                'internet',         // Internet/telefone
+                'rent',            // Aluguel
+                'supplies',        // Insumos/materiais
+                'equipment',       // Equipamentos
+                'salary',          // Salários
+                'taxes',           // Impostos
+                'marketing',       // Marketing/publicidade
+                'maintenance',     // Manutenção
+                'other'            // Outros
+            ]);
+            $table->decimal('amount', 10, 2);
+            $table->date('due_date')->nullable();
+            $table->date('paid_date')->nullable();
+            $table->enum('status', ['pending', 'paid', 'overdue', 'cancelled'])->default('pending');
+            $table->enum('payment_method', ['cash', 'debit_card', 'credit_card', 'pix', 'bank_transfer', 'other'])->nullable();
+            $table->text('notes')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('expenses');
+    }
+};

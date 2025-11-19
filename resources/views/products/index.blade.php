@@ -11,6 +11,30 @@
     </a>
 </div>
 
+<!-- Filtros -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="GET" action="{{ route('products.index') }}" class="row g-3">
+            <div class="col-md-4">
+                <label for="category" class="form-label">Categoria</label>
+                <select class="form-select" id="category" name="category">
+                    <option value="">Todas as Categorias</option>
+                    <option value="acessorio" {{ request('category') == 'acessorio' ? 'selected' : '' }}>Acessório</option>
+                    <option value="peça" {{ request('category') == 'peça' ? 'selected' : '' }}>Peça</option>
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                    <i class="bi bi-filter"></i> Filtrar
+                </button>
+                <a href="{{ route('products.index') }}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Limpar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
@@ -20,8 +44,28 @@
                         <th>#</th>
                         <th>Nome</th>
                         <th>Categoria</th>
-                        <th>Preço</th>
-                        <th>Estoque</th>
+                        <th>
+                            <a href="{{ route('products.index', array_merge(request()->all(), ['sort' => 'price', 'direction' => request('sort') == 'price' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" 
+                               class="text-decoration-none text-dark">
+                                Preço
+                                @if(request('sort') == 'price')
+                                    <i class="bi bi-arrow-{{ request('direction') == 'asc' ? 'up' : 'down' }}"></i>
+                                @else
+                                    <i class="bi bi-arrow-down-up text-muted"></i>
+                                @endif
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ route('products.index', array_merge(request()->all(), ['sort' => 'stock', 'direction' => request('sort') == 'stock' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" 
+                               class="text-decoration-none text-dark">
+                                Estoque
+                                @if(request('sort') == 'stock')
+                                    <i class="bi bi-arrow-{{ request('direction') == 'asc' ? 'up' : 'down' }}"></i>
+                                @else
+                                    <i class="bi bi-arrow-down-up text-muted"></i>
+                                @endif
+                            </a>
+                        </th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -54,14 +98,14 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center">Nenhum produto cadastrado</td>
+                        <td colspan="6" class="text-center">Nenhum produto encontrado</td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
-        {{ $products->links() }}
+        {{ $products->onEachSide(1)->links() }}
     </div>
 </div>
 @endsection

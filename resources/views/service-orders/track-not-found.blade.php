@@ -12,7 +12,7 @@
             min-height: 100vh;
             display: flex;
             align-items: center;
-            padding: 20px;
+            padding: 10px;
         }
         .container {
             max-width: 600px;
@@ -26,11 +26,11 @@
         .error-header {
             background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
             color: white;
-            padding: 40px 30px;
+            padding: 30px 20px;
             text-align: center;
         }
         .error-header .company-name {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 900;
             margin-bottom: 15px;
         }
@@ -41,47 +41,59 @@
             color: #FFD700;
         }
         .error-header .icon {
-            font-size: 5rem;
-            margin-bottom: 20px;
+            font-size: 3.5rem;
+            margin-bottom: 15px;
             opacity: 0.9;
         }
+        .error-header h3 {
+            font-size: 1.1rem;
+            margin: 0;
+        }
         .error-content {
-            padding: 40px 30px;
+            padding: 30px 20px;
             text-align: center;
         }
         .error-content h2 {
             color: #dc3545;
             font-weight: 700;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
         }
         .error-content p {
             color: #6c757d;
-            font-size: 1.1rem;
-            margin-bottom: 30px;
+            font-size: 1rem;
+            margin-bottom: 20px;
         }
         .order-number {
             background: #f8d7da;
             color: #721c24;
-            padding: 15px 25px;
+            padding: 12px 20px;
             border-radius: 10px;
             display: inline-block;
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+        }
+        .error-content ul {
+            font-size: 0.9rem;
+            margin-bottom: 25px;
         }
         .whatsapp-btn {
             background: #25D366;
             color: white;
-            padding: 15px 30px;
+            padding: 12px 25px;
             border-radius: 50px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            gap: 8px;
             transition: all 0.3s;
             box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+            width: 100%;
+            max-width: 300px;
         }
         .whatsapp-btn:hover {
             background: #1fb855;
@@ -90,13 +102,13 @@
             box-shadow: 0 6px 15px rgba(37, 211, 102, 0.4);
         }
         .whatsapp-btn i {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
         }
         .contact-info {
             background: #f8f9fa;
-            padding: 25px;
+            padding: 20px 15px;
             border-radius: 10px;
-            margin-top: 30px;
+            margin-top: 25px;
             text-align: left;
         }
         .contact-info h5 {
@@ -104,23 +116,114 @@
             font-weight: 700;
             margin-bottom: 15px;
             text-align: center;
+            font-size: 1rem;
         }
         .contact-info .info-item {
-            padding: 8px 0;
+            padding: 10px 0;
             color: #495057;
+            font-size: 0.9rem;
+            line-height: 1.6;
         }
         .contact-info .info-item i {
             color: #FFD700;
             width: 20px;
-            margin-right: 10px;
+            margin-right: 8px;
+            vertical-align: top;
+            flex-shrink: 0;
+        }
+        .contact-info .info-item strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+        .contact-info .info-item .address-text,
+        .contact-info .info-item .phone-text,
+        .contact-info .info-item .hours-text {
+            display: block;
+            margin-left: 28px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         .footer {
             text-align: center;
             color: #6c757d;
-            font-size: 0.9rem;
-            margin-top: 30px;
-            padding-top: 20px;
+            font-size: 0.85rem;
+            margin-top: 20px;
+            padding-top: 15px;
             border-top: 1px solid #dee2e6;
+        }
+
+        /* Media Queries para Desktop */
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            .error-header {
+                padding: 40px 30px;
+            }
+            .error-header .company-name {
+                font-size: 1.8rem;
+            }
+            .error-header .icon {
+                font-size: 5rem;
+                margin-bottom: 20px;
+            }
+            .error-header h3 {
+                font-size: 1.25rem;
+            }
+            .error-content {
+                padding: 40px 30px;
+            }
+            .error-content h2 {
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+            .error-content p {
+                font-size: 1.1rem;
+                margin-bottom: 30px;
+            }
+            .order-number {
+                padding: 15px 25px;
+                font-size: 1.3rem;
+                margin-bottom: 30px;
+            }
+            .error-content ul {
+                font-size: 1rem;
+            }
+            .whatsapp-btn {
+                padding: 15px 30px;
+                font-size: 1.1rem;
+                width: auto;
+            }
+            .whatsapp-btn i {
+                font-size: 1.5rem;
+            }
+            .contact-info {
+                padding: 25px;
+            }
+            .contact-info h5 {
+                font-size: 1.1rem;
+            }
+            .contact-info .info-item {
+                padding: 12px 0;
+                font-size: 1rem;
+            }
+            .contact-info .info-item strong {
+                display: inline;
+                margin-bottom: 0;
+                font-size: 1rem;
+            }
+            .contact-info .info-item .address-text,
+            .contact-info .info-item .phone-text,
+            .contact-info .info-item .hours-text {
+                display: inline;
+                margin-left: 0;
+            }
+            .footer {
+                font-size: 0.9rem;
+                margin-top: 30px;
+                padding-top: 20px;
+            }
         }
     </style>
 </head>
@@ -171,17 +274,24 @@
                     <h5><i class="bi bi-info-circle"></i> Informações de Contato</h5>
                     <div class="info-item">
                         <i class="bi bi-geo-alt-fill"></i>
-                        <strong>Endereço:</strong><br>
-                        <span style="margin-left: 30px;">Av. Pérsio de Queirós Filho, 919 - Catiapoã</span><br>
-                        <span style="margin-left: 30px;">São Vicente - SP, 11370-304</span>
+                        <div>
+                            <strong>Endereço:</strong>
+                            <span class="address-text">Av. Pérsio de Queirós Filho, 919 - Catiapoã, São Vicente - SP, 11370-304</span>
+                        </div>
                     </div>
                     <div class="info-item">
                         <i class="bi bi-telephone-fill"></i>
-                        <strong>Telefone:</strong> (13) 99784-1161
+                        <div>
+                            <strong>Telefone:</strong>
+                            <span class="phone-text">(13) 99784-1161</span>
+                        </div>
                     </div>
                     <div class="info-item">
                         <i class="bi bi-clock-fill"></i>
-                        <strong>Horário:</strong> Segunda a Sexta, 9h às 18h
+                        <div>
+                            <strong>Horário:</strong>
+                            <span class="hours-text">Segunda a Sexta, 9h às 18h</span>
+                        </div>
                     </div>
                 </div>
             </div>

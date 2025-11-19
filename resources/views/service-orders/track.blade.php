@@ -10,7 +10,7 @@
         body {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             min-height: 100vh;
-            padding: 20px 0;
+            padding: 10px;
         }
         .track-container {
             max-width: 900px;
@@ -19,13 +19,13 @@
         .header-section {
             background: linear-gradient(135deg, #212529 0%, #343a40 100%);
             color: white;
-            padding: 30px;
+            padding: 20px 15px;
             border-radius: 15px 15px 0 0;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .header-section .company-name {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 900;
             margin-bottom: 10px;
         }
@@ -38,6 +38,13 @@
         .header-section p {
             margin: 5px 0;
             opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        .header-section h4 {
+            font-size: 1rem;
+        }
+        .header-section h2 {
+            font-size: 1.5rem;
         }
         .content-card {
             background: white;
@@ -46,10 +53,13 @@
             overflow: hidden;
         }
         .status-banner {
-            padding: 25px;
+            padding: 20px 15px;
             text-align: center;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
+        }
+        .status-banner i {
+            font-size: 1.2rem;
         }
         .status-banner.pending {
             background: #fff3cd;
@@ -72,17 +82,17 @@
             color: #58151c;
         }
         .info-section {
-            padding: 30px;
+            padding: 20px 15px;
         }
         .info-card {
             background: #f8f9fa;
             border-left: 4px solid #FFD700;
-            padding: 15px 20px;
-            margin-bottom: 15px;
+            padding: 12px 15px;
+            margin-bottom: 12px;
             border-radius: 5px;
         }
         .info-card label {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: 700;
             color: #6c757d;
             text-transform: uppercase;
@@ -91,31 +101,35 @@
             display: block;
         }
         .info-card .value {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             color: #212529;
+            word-break: break-word;
         }
         .section-title {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: #212529;
-            margin: 30px 0 20px 0;
-            padding-bottom: 10px;
+            margin: 20px 0 15px 0;
+            padding-bottom: 8px;
             border-bottom: 3px solid #FFD700;
         }
         .whatsapp-btn {
             background: #25D366;
             color: white;
-            padding: 15px 30px;
+            padding: 12px 25px;
             border-radius: 50px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            gap: 8px;
             transition: all 0.3s;
             box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+            width: 100%;
+            max-width: 300px;
         }
         .whatsapp-btn:hover {
             background: #1fb855;
@@ -124,57 +138,65 @@
             box-shadow: 0 6px 15px rgba(37, 211, 102, 0.4);
         }
         .whatsapp-btn i {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
         }
         .footer-info {
             background: #212529;
             color: white;
-            padding: 25px;
+            padding: 20px 15px;
             text-align: center;
-            margin-top: 30px;
+            margin-top: 20px;
             border-radius: 15px;
         }
+        .footer-info .company-name {
+            font-size: 1.3rem;
+        }
         .footer-info .contact {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             opacity: 0.9;
             margin-top: 10px;
+            line-height: 1.8;
         }
         .footer-info .contact strong {
             color: #FFD700;
         }
+        .footer-info .contact > div {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
         .timeline {
             position: relative;
-            padding-left: 30px;
+            padding-left: 25px;
         }
         .timeline-item {
             position: relative;
-            padding-bottom: 20px;
+            padding-bottom: 15px;
         }
         .timeline-item::before {
             content: '';
             position: absolute;
-            left: -22px;
-            top: 8px;
-            width: 12px;
-            height: 12px;
+            left: -20px;
+            top: 6px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: #FFD700;
-            border: 3px solid #212529;
+            border: 2px solid #212529;
         }
         .timeline-item::after {
             content: '';
             position: absolute;
-            left: -17px;
-            top: 20px;
+            left: -16px;
+            top: 16px;
             width: 2px;
-            height: calc(100% - 12px);
+            height: calc(100% - 10px);
             background: #dee2e6;
         }
         .timeline-item:last-child::after {
             display: none;
         }
         .timeline-item .time {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #6c757d;
             font-weight: 600;
         }
@@ -182,6 +204,95 @@
             font-weight: 700;
             color: #212529;
             margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+
+        /* Media Queries para Desktop */
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            .header-section {
+                padding: 30px;
+            }
+            .header-section .company-name {
+                font-size: 2rem;
+            }
+            .header-section p {
+                font-size: 1rem;
+            }
+            .header-section h4 {
+                font-size: 1.25rem;
+            }
+            .header-section h2 {
+                font-size: 2rem;
+            }
+            .status-banner {
+                padding: 25px;
+                font-size: 1.1rem;
+            }
+            .status-banner i {
+                font-size: 1.5rem;
+            }
+            .info-section {
+                padding: 30px;
+            }
+            .info-card {
+                padding: 15px 20px;
+                margin-bottom: 15px;
+            }
+            .info-card label {
+                font-size: 0.85rem;
+            }
+            .info-card .value {
+                font-size: 1.1rem;
+            }
+            .section-title {
+                font-size: 1.3rem;
+                margin: 30px 0 20px 0;
+                padding-bottom: 10px;
+            }
+            .whatsapp-btn {
+                padding: 15px 30px;
+                font-size: 1.1rem;
+                width: auto;
+            }
+            .whatsapp-btn i {
+                font-size: 1.5rem;
+            }
+            .footer-info {
+                padding: 25px;
+                margin-top: 30px;
+            }
+            .footer-info .company-name {
+                font-size: 1.5rem;
+            }
+            .footer-info .contact {
+                font-size: 0.9rem;
+            }
+            .timeline {
+                padding-left: 30px;
+            }
+            .timeline-item {
+                padding-bottom: 20px;
+            }
+            .timeline-item::before {
+                left: -22px;
+                top: 8px;
+                width: 12px;
+                height: 12px;
+                border: 3px solid #212529;
+            }
+            .timeline-item::after {
+                left: -17px;
+                top: 20px;
+            }
+            .timeline-item .time {
+                font-size: 0.85rem;
+            }
+            .timeline-item .label {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -330,8 +441,13 @@
                 <span class="jd" style="color: white;">JD</span> <span class="smart">SMART</span>
             </div>
             <div class="contact">
-                <strong>Endereço:</strong> Av. Pérsio de Queirós Filho, 919 - Catiapoã, São Vicente - SP, 11370-304<br>
-                <strong>Telefone:</strong> (13) 99784-1161
+                <div style="margin-bottom: 8px;">
+                    <strong>Endereço:</strong><br class="d-md-none">
+                    <span class="d-block d-md-inline">Av. Pérsio de Queirós Filho, 919 - Catiapoã, São Vicente - SP, 11370-304</span>
+                </div>
+                <div>
+                    <strong>Telefone:</strong> (13) 99784-1161
+                </div>
             </div>
         </div>
     </div>

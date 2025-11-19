@@ -12,9 +12,39 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class SaleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $sales = Sale::with('customer', 'items')->latest()->paginate(15);
+        $query = Sale::with('customer', 'items');
+
+        // Filtro por data inicial
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        // Filtro por data final
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Filtro por método de pagamento
+        if ($request->filled('payment_method')) {
+            $query->where('payment_method', $request->payment_method);
+        }
+
+        // Ordenação
+        $sortField = $request->get('sort', 'created_at');
+        $sortDirection = $request->get('direction', 'desc');
+
+        // Validar campos de ordenação permitidos
+        $allowedSorts = ['created_at', 'total'];
+        if (in_array($sortField, $allowedSorts)) {
+            $query->orderBy($sortField, $sortDirection);
+        } else {
+            $query->latest();
+        }
+
+        $sales = $query->paginate(15)->withQueryString();
+        
         return view('sales.index', compact('sales'));
     }
 

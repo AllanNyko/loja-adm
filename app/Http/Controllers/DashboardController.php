@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ServiceOrder;
 use App\Models\Sale;
 use App\Models\Product;
+use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -13,11 +14,11 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Calcular média mensal e comparação
+        // Calcular média mensal e comparação (considerando despesas)
         $currentYear = Carbon::now()->year;
         $currentMonth = Carbon::now()->month;
         
-        $totalRevenueYearToDate = 0;
+        $totalNetRevenueYearToDate = 0;
         for ($month = 1; $month <= $currentMonth; $month++) {
             $sales = Sale::whereYear('created_at', $currentYear)
                 ->whereMonth('created_at', $month)
@@ -28,32 +29,55 @@ class DashboardController extends Controller
                 ->where('status', 'completed')
                 ->sum('price');
             
-            $totalRevenueYearToDate += ($sales + $orders);
+            $expenses = Expense::whereYear('created_at', $currentYear)
+                ->whereMonth('created_at', $month)
+                ->where('status', 'paid')
+                ->sum('amount');
+            
+            $totalNetRevenueYearToDate += (($sales + $orders) - $expenses);
         }
         
-        $monthlyAverage = $currentMonth > 0 ? $totalRevenueYearToDate / $currentMonth : 0;
+        $monthlyAverage = $currentMonth > 0 ? $totalNetRevenueYearToDate / $currentMonth : 0;
         
-        // Faturamento do mês atual
-        $currentMonthRevenue = Sale::whereMonth('created_at', now()->month)
+        // Faturamento bruto do mês atual
+        $currentMonthSales = Sale::whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
-            ->sum('total') +
-            ServiceOrder::whereMonth('created_at', now()->month)
+            ->sum('total');
+            
+        $currentMonthOrders = ServiceOrder::whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->where('status', 'completed')
             ->sum('price');
         
-        $differenceFromAverage = $currentMonthRevenue - $monthlyAverage;
+        // Despesas do mês atual
+        $currentMonthExpenses = Expense::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->where('status', 'paid')
+            ->sum('amount');
+        
+        // Faturamento líquido do mês (lucro bruto - despesas)
+        $currentMonthNetRevenue = ($currentMonthSales + $currentMonthOrders) - $currentMonthExpenses;
+        
+        $differenceFromAverage = $currentMonthNetRevenue - $monthlyAverage;
+        
+        // Faturamento do dia (lucro bruto - despesas do dia)
+        $todaySales = Sale::whereDate('created_at', today())->sum('total');
+        $todayOrders = ServiceOrder::whereDate('created_at', today())
+            ->where('status', 'completed')
+            ->sum('price');
+        $todayExpenses = Expense::whereDate('created_at', today())
+            ->where('status', 'paid')
+            ->sum('amount');
+        
+        $todayNetRevenue = ($todaySales + $todayOrders) - $todayExpenses;
         
         // Estatísticas gerais
         $stats = [
             'pending_orders' => ServiceOrder::where('status', 'pending')->count(),
             'in_progress_orders' => ServiceOrder::where('status', 'in_progress')->count(),
             'completed_orders' => ServiceOrder::where('status', 'completed')->count(),
-            'total_sales_today' => Sale::whereDate('created_at', today())->sum('total') + 
-                                   ServiceOrder::whereDate('created_at', today())
-                                   ->where('status', 'completed')
-                                   ->sum('price'),
-            'total_sales_month' => $currentMonthRevenue,
+            'total_sales_today' => $todayNetRevenue,
+            'total_sales_month' => $currentMonthNetRevenue,
             'low_stock_products' => Product::where('stock', '<', 5)->count(),
             'monthly_average' => $monthlyAverage,
             'difference_from_average' => $differenceFromAverage,

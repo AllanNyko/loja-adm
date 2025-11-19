@@ -11,6 +11,41 @@
     </a>
 </div>
 
+<!-- Filtros -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="GET" action="{{ route('sales.index') }}" class="row g-3">
+            <div class="col-md-3">
+                <label for="date_from" class="form-label">Data Inicial</label>
+                <input type="date" class="form-control" id="date_from" name="date_from" value="{{ request('date_from') }}">
+            </div>
+            <div class="col-md-3">
+                <label for="date_to" class="form-label">Data Final</label>
+                <input type="date" class="form-control" id="date_to" name="date_to" value="{{ request('date_to') }}">
+            </div>
+            <div class="col-md-3">
+                <label for="payment_method" class="form-label">Método de Pagamento</label>
+                <select class="form-select" id="payment_method" name="payment_method">
+                    <option value="">Todos</option>
+                    <option value="dinheiro" {{ request('payment_method') == 'dinheiro' ? 'selected' : '' }}>Dinheiro</option>
+                    <option value="cartao_debito" {{ request('payment_method') == 'cartao_debito' ? 'selected' : '' }}>Cartão de Débito</option>
+                    <option value="cartao_credito" {{ request('payment_method') == 'cartao_credito' ? 'selected' : '' }}>Cartão de Crédito</option>
+                    <option value="pix" {{ request('payment_method') == 'pix' ? 'selected' : '' }}>PIX</option>
+                    <option value="outro" {{ request('payment_method') == 'outro' ? 'selected' : '' }}>Outro</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                    <i class="bi bi-filter"></i> Filtrar
+                </button>
+                <a href="{{ route('sales.index') }}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Limpar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
@@ -19,9 +54,29 @@
                     <tr>
                         <th>#</th>
                         <th>Cliente</th>
-                        <th>Total</th>
+                        <th>
+                            <a href="{{ route('sales.index', array_merge(request()->all(), ['sort' => 'total', 'direction' => request('sort') == 'total' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" 
+                               class="text-decoration-none text-dark">
+                                Total
+                                @if(request('sort') == 'total')
+                                    <i class="bi bi-arrow-{{ request('direction') == 'asc' ? 'up' : 'down' }}"></i>
+                                @else
+                                    <i class="bi bi-arrow-down-up text-muted"></i>
+                                @endif
+                            </a>
+                        </th>
                         <th>Pagamento</th>
-                        <th>Data</th>
+                        <th>
+                            <a href="{{ route('sales.index', array_merge(request()->all(), ['sort' => 'created_at', 'direction' => request('sort') == 'created_at' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" 
+                               class="text-decoration-none text-dark">
+                                Data
+                                @if(request('sort') == 'created_at' || !request('sort'))
+                                    <i class="bi bi-arrow-{{ request('direction', 'desc') == 'asc' ? 'up' : 'down' }}"></i>
+                                @else
+                                    <i class="bi bi-arrow-down-up text-muted"></i>
+                                @endif
+                            </a>
+                        </th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -53,14 +108,14 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center">Nenhuma venda registrada</td>
+                        <td colspan="6" class="text-center">Nenhuma venda encontrada</td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
-        {{ $sales->links() }}
+        {{ $sales->onEachSide(1)->links() }}
     </div>
 </div>
 @endsection

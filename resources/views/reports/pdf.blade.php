@@ -46,25 +46,25 @@
         }
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
             margin-top: 10px;
         }
         .summary-item {
             text-align: center;
-            padding: 10px;
+            padding: 8px;
             background-color: white;
             border-radius: 3px;
         }
         .summary-item h3 {
             margin: 0 0 5px 0;
             color: #000;
-            font-size: 12px;
+            font-size: 10px;
             font-weight: bold;
         }
         .summary-item p {
             margin: 0;
-            font-size: 18px;
+            font-size: 14px;
             font-weight: bold;
             color: #333;
         }
@@ -154,10 +154,21 @@
                 <h3>Ordens de Serviço</h3>
                 <p>R$ {{ number_format($monthTotal['orders'], 2, ',', '.') }}</p>
             </div>
+            <div class="summary-item">
+                <h3>Despesas Pagas</h3>
+                <p style="color: #dc3545;">R$ {{ number_format($monthTotal['expenses'], 2, ',', '.') }}</p>
+            </div>
             <div class="summary-item total">
                 <h3>Faturamento Total</h3>
-                <p>R$ {{ number_format($monthTotal['total'], 2, ',', '.') }}</p>
+                <p>R$ {{ number_format($monthTotal['revenue'], 2, ',', '.') }}</p>
             </div>
+        </div>
+        <div style="margin-top: 15px; padding: 10px; background: {{ $monthTotal['net_revenue'] >= 0 ? '#d1e7dd' : '#fff3cd' }}; border-left: 4px solid {{ $monthTotal['net_revenue'] >= 0 ? '#0f5132' : '#664d03' }};">
+            <h3 style="margin: 0 0 5px 0; color: {{ $monthTotal['net_revenue'] >= 0 ? '#0f5132' : '#664d03' }};">Faturamento Líquido</h3>
+            <p style="margin: 0; font-size: 18px; font-weight: bold; color: {{ $monthTotal['net_revenue'] >= 0 ? '#0f5132' : '#664d03' }};">
+                R$ {{ number_format($monthTotal['net_revenue'], 2, ',', '.') }}
+                <span style="font-size: 12px; font-weight: normal;">(Faturamento - Despesas)</span>
+            </p>
         </div>
     </div>
 

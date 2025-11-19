@@ -13,18 +13,22 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Criar usuário admin padrão
-        User::create([
-            'name' => 'Administrador',
-            'email' => 'admin@jdsmart.com',
-            'password' => Hash::make('admin123'),
-        ]);
+        // Criar usuário admin padrão se não existir
+        User::firstOrCreate(
+            ['email' => 'admin@jdsmart.com'],
+            [
+                'name' => 'Administrador',
+                'password' => Hash::make('admin123'),
+            ]
+        );
 
-        // Criar usuário teste
-        User::create([
-            'name' => 'João Silva',
-            'email' => 'joao@jdsmart.com',
-            'password' => Hash::make('senha123'),
-        ]);
+        // Criar usuário teste se não existir
+        User::firstOrCreate(
+            ['email' => 'joao@jdsmart.com'],
+            [
+                'name' => 'João Silva',
+                'password' => Hash::make('senha123'),
+            ]
+        );
     }
 }
