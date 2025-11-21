@@ -25,6 +25,7 @@ class ServiceOrder extends Model
         'status',
         'deadline',
         'notes',
+        'pdf_hash',
     ];
 
     protected $casts = [

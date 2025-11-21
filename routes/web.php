@@ -17,6 +17,9 @@ Route::get('/', function () {
 // Rota pública para rastreamento de Ordem de Serviço
 Route::get('/os/{orderNumber}', [ServiceOrderController::class, 'track'])->name('service-orders.track');
 
+// Rota pública para download de PDF via hash
+Route::get('/os/download/{hash}', [ServiceOrderController::class, 'downloadPdf'])->name('service-orders.download-pdf');
+
 // Rotas protegidas por autenticação
 Route::middleware(['auth'])->group(function () {
     // Dashboard
@@ -34,6 +37,8 @@ Route::middleware(['auth'])->group(function () {
         ->name('service-orders.export-pdf');
     Route::get('service-orders/{serviceOrder}/client-pdf', [ServiceOrderController::class, 'exportClientPdf'])
         ->name('service-orders.export-client-pdf');
+    Route::get('service-orders/{serviceOrder}/whatsapp', [ServiceOrderController::class, 'sendToWhatsApp'])
+        ->name('service-orders.whatsapp');
     Route::get('/api/devices/search', [ServiceOrderController::class, 'searchDevices'])
         ->name('api.devices.search');
     Route::get('/api/devices/{manufacturer}/models', [ServiceOrderController::class, 'getManufacturerModels'])

@@ -197,6 +197,92 @@ class ServiceOrderController extends Controller
     }
 
     /**
+     * Gera PDF, salva no servidor e redireciona para WhatsApp
+     */
+    public function sendToWhatsApp(ServiceOrder $serviceOrder)
+    {
+        $serviceOrder->load('customer');
+        
+        // Gerar hash único se não existir
+        if (!$serviceOrder->pdf_hash) {
+            $serviceOrder->pdf_hash = hash('sha256', $serviceOrder->id . time() . uniqid());
+            $serviceOrder->save();
+        }
+        
+        // Gerar PDF
+        $pdf = Pdf::loadView('service-orders.client-pdf', [
+            'order' => $serviceOrder,
+        ]);
+        
+        // Criar diretório se não existir
+        $directory = storage_path('app/public/os-pdfs');
+        if (!file_exists($directory)) {
+            mkdir($directory, 0755, true);
+        }
+        
+        // Salvar PDF
+        $filename = 'os-' . $serviceOrder->id . '-' . $serviceOrder->pdf_hash . '.pdf';
+        $filepath = $directory . '/' . $filename;
+        $pdf->save($filepath);
+        
+        // Gerar URL de download usando domínio de produção
+        $baseUrl = config('app.url');
+        $downloadUrl = $baseUrl . '/os/download/' . $serviceOrder->pdf_hash;
+        
+        // Preparar mensagem do WhatsApp (sem emojis para evitar problemas de codificação)
+        $phone = preg_replace('/[^0-9]/', '', $serviceOrder->customer->phone); // Remove formatação
+        
+        $message = "Ola *{$serviceOrder->customer->name}*!\n\n";
+        $message .= "Agradecemos por escolher a *JD SMART*!\n\n";
+        $message .= "Sua *Ordem de Servico #{$serviceOrder->id}* foi gerada com sucesso!\n\n";
+        $message .= "*Dispositivo:* {$serviceOrder->device_model}\n";
+        $message .= "*Data:* " . $serviceOrder->created_at->format('d/m/Y H:i') . "\n\n";
+        $message .= "Voce pode baixar o documento completo (com termo de garantia) clicando no link abaixo:\n\n";
+        $message .= "{$downloadUrl}\n\n";
+        $message .= "_Este link ficara disponivel para voce consultar sempre que precisar!_\n\n";
+        $message .= "Em caso de duvidas, estamos a disposicao!\n";
+        $message .= "Telefone: (13) 99784-1161";
+        
+        // Gerar link do WhatsApp
+        $whatsappUrl = "https://wa.me/{$phone}?text=" . urlencode($message);
+        
+        return redirect($whatsappUrl);
+    }
+
+    /**
+     * Download público do PDF via hash
+     */
+    public function downloadPdf($hash)
+    {
+        // Buscar ordem de serviço pelo hash
+        $serviceOrder = ServiceOrder::where('pdf_hash', $hash)->first();
+        
+        if (!$serviceOrder) {
+            abort(404, 'Documento não encontrado');
+        }
+        
+        $filename = 'os-' . $serviceOrder->id . '-' . $hash . '.pdf';
+        $filepath = storage_path('app/public/os-pdfs/' . $filename);
+        
+        // Se o arquivo não existir, gerar novamente
+        if (!file_exists($filepath)) {
+            $serviceOrder->load('customer');
+            $pdf = Pdf::loadView('service-orders.client-pdf', [
+                'order' => $serviceOrder,
+            ]);
+            
+            $directory = storage_path('app/public/os-pdfs');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
+            
+            $pdf->save($filepath);
+        }
+        
+        return response()->download($filepath, 'Ordem-Servico-' . $serviceOrder->id . '-JDSmart.pdf');
+    }
+
+    /**
      * Rastreamento público de ordem de serviço
      */
     public function track($orderNumber)

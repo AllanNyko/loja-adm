@@ -367,7 +367,7 @@
             <div class="signature-line">
                 Assinatura do Cliente:
                 <span style="margin-top: 10px; margin-left: 10pxs; font-size: 10px;">
-                    {{ $order->customer->name }}<span> {{'N° documento' . $order->customer_document ?? 'CPF/CNPJ não informado' }}</span>
+                    {{ $order->customer->name }}<span> {{'N° documento ' . $order->customer_document ?? 'CPF/CNPJ não informado' }}</span>
                    
     </span>
             </div>
