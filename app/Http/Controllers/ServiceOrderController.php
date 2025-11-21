@@ -185,6 +185,17 @@ class ServiceOrderController extends Controller
         return $pdf->download('ordem-servico-' . $serviceOrder->id . '.pdf');
     }
 
+    public function exportClientPdf(ServiceOrder $serviceOrder)
+    {
+        $serviceOrder->load('customer');
+        
+        $pdf = Pdf::loadView('service-orders.client-pdf', [
+            'order' => $serviceOrder,
+        ]);
+
+        return $pdf->download('ordem-servico-cliente-' . $serviceOrder->id . '.pdf');
+    }
+
     /**
      * Rastreamento público de ordem de serviço
      */

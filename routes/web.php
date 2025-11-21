@@ -32,6 +32,8 @@ Route::middleware(['auth'])->group(function () {
         ->name('service-orders.update-status');
     Route::get('service-orders/{serviceOrder}/pdf', [ServiceOrderController::class, 'exportPdf'])
         ->name('service-orders.export-pdf');
+    Route::get('service-orders/{serviceOrder}/client-pdf', [ServiceOrderController::class, 'exportClientPdf'])
+        ->name('service-orders.export-client-pdf');
     Route::get('/api/devices/search', [ServiceOrderController::class, 'searchDevices'])
         ->name('api.devices.search');
     Route::get('/api/devices/{manufacturer}/models', [ServiceOrderController::class, 'getManufacturerModels'])

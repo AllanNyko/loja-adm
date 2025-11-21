@@ -99,6 +99,9 @@
                                 <a href="{{ route('service-orders.export-pdf', $order) }}" class="btn btn-danger btn-sm" title="Exportar PDF">
                                     <i class="bi bi-file-pdf"></i>
                                 </a>
+                                <a href="{{ route('service-orders.export-client-pdf', $order) }}" class="btn btn-success btn-sm" title="PDF para Cliente (WhatsApp)">
+                                    <i class="bi bi-whatsapp"></i>
+                                </a>
                             </div>
                         </td>
                     </tr>
