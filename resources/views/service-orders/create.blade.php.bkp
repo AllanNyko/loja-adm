@@ -581,16 +581,6 @@ function updateProblemsList() {
     document.getElementById('problems_data').value = JSON.stringify(dataToSave);
 }
 
-// Garantir que os dados sejam salvos antes do submit
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            updateProblemsData();
-        });
-    }
-});
-
 function removeProblem(index) {
     if (confirm('Deseja remover este problema?')) {
         problemsArray.splice(index, 1);

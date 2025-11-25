@@ -20,6 +20,9 @@ Route::get('/os/{orderNumber}', [ServiceOrderController::class, 'track'])->name(
 // Rota pública para download de PDF via hash
 Route::get('/os/download/{hash}', [ServiceOrderController::class, 'downloadPdf'])->name('service-orders.download-pdf');
 
+// Rota pública para galeria de fotos
+Route::get('/os/photos/{hash}', [ServiceOrderController::class, 'showPhotosGallery'])->name('service-orders.photos-gallery');
+
 // Rotas protegidas por autenticação
 Route::middleware(['auth'])->group(function () {
     // Dashboard
@@ -33,6 +36,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('service-orders', ServiceOrderController::class);
     Route::post('service-orders/{serviceOrder}/status', [ServiceOrderController::class, 'updateStatus'])
         ->name('service-orders.update-status');
+    Route::post('service-orders/{serviceOrder}/cancel', [ServiceOrderController::class, 'cancelOrder'])
+        ->name('service-orders.cancel');
     Route::get('service-orders/{serviceOrder}/pdf', [ServiceOrderController::class, 'exportPdf'])
         ->name('service-orders.export-pdf');
     Route::get('service-orders/{serviceOrder}/client-pdf', [ServiceOrderController::class, 'exportClientPdf'])

@@ -41,6 +41,39 @@
                     <p class="mt-1">{{ $serviceOrder->problem_description }}</p>
                 </div>
 
+                @if($serviceOrder->problems_photos && count($serviceOrder->problems_photos) > 0)
+                <div class="mb-3">
+                    <strong>📸 Problemas Documentados:</strong>
+                    <div class="mt-2">
+                        @foreach($serviceOrder->problems_photos as $index => $problem)
+                            <div class="card mb-2">
+                                <div class="card-body p-2">
+                                    <h6 class="mb-2">
+                                        <i class="bi bi-exclamation-triangle text-warning"></i> 
+                                        {{ $problem['description'] ?? 'Problema ' . ($index + 1) }}
+                                    </h6>
+                                    @if(isset($problem['photos']) && count($problem['photos']) > 0)
+                                        <div class="row g-1">
+                                            @foreach($problem['photos'] as $photoIndex => $photoPath)
+                                                <div class="col-4 col-md-3 col-lg-2">
+                                                    <a href="{{ asset('storage/' . $photoPath) }}" target="_blank">
+                                                        <img src="{{ asset('storage/' . $photoPath) }}" class="img-fluid rounded border" alt="Foto {{ $photoIndex + 1 }}" style="cursor: pointer; object-fit: cover; height: 100px; width: 100%;">
+                                                    </a>
+                                                    <small class="text-muted d-block text-center">Foto {{ $photoIndex + 1 }}</small>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                        <small class="text-muted d-block mt-1">{{ count($problem['photos']) }} foto(s)</small>
+                                    @else
+                                        <small class="text-muted">Sem fotos registradas</small>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
                 @if($serviceOrder->diagnostic)
                 <div class="mb-3">
                     <strong>Diagnóstico Técnico:</strong>

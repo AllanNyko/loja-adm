@@ -270,50 +270,38 @@
     <!-- Problemas Documentados com Fotos -->
     @if($order->problems_photos && count($order->problems_photos) > 0)
     <div class="order-info" style="page-break-inside: avoid;">
-        <h2>📸 Registro Fotográfico dos Problemas</h2>
-        
-        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
-            <p style="margin: 0 0 10px 0; font-size: 11px;">
-                <strong>Fotos disponíveis online:</strong> Para visualizar todas as fotos em alta qualidade, 
-                acesse a galeria através do QR Code ou link abaixo:
-            </p>
-            
-            <div style="text-align: center; margin: 15px 0;">
-                @php
-                    $galleryUrl = url('/os/photos/' . $order->pdf_hash);
-                @endphp
-                
-                {!! QrCode::size(150)->generate($galleryUrl) !!}
-                
-                <p style="font-size: 9px; margin: 10px 0 0 0; word-break: break-all;">
-                    <strong>Link direto:</strong><br>
-                    {{ $galleryUrl }}
-                </p>
-            </div>
-            
-            <p style="font-size: 9px; font-style: italic; margin: 0; text-align: center;">
-                Aponte a câmera do celular para o QR Code acima ou acesse o link para ver todas as fotos.
-            </p>
-        </div>
-        
+        <h2>📸 Problemas Documentados (Estado de Entrada)</h2>
         @foreach($order->problems_photos as $index => $problem)
-            <div style="margin-bottom: 10px; border: 1px solid #000; padding: 8px; background: #fff;">
-                <p style="font-size: 11px; margin: 0; font-weight: bold;">
+            <div style="margin-bottom: 15px; border: 1px solid #000; padding: 10px; page-break-inside: avoid;">
+                <h3 style="font-size: 12px; margin: 0 0 10px 0; font-weight: bold;">
                     {{ ($index + 1) }}. {{ $problem['description'] ?? 'Problema ' . ($index + 1) }}
-                </p>
-                <p style="font-size: 9px; margin: 3px 0 0 0; color: #666;">
-                    {{ count($problem['photos'] ?? []) }} foto(s) disponível(is) na galeria online
-                </p>
+                </h3>
+                
+                @if(isset($problem['photos']) && count($problem['photos']) > 0)
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;">
+                        @foreach($problem['photos'] as $photoIndex => $photoPath)
+                            @php
+                                $fullPath = storage_path('app/public/' . $photoPath);
+                            @endphp
+                            @if(file_exists($fullPath))
+                                <div style="text-align: center;">
+                                    <img src="{{ $fullPath }}" style="width: 100%; height: 120px; object-fit: cover; border: 1px solid #000;">
+                                    <p style="font-size: 8px; margin: 2px 0 0 0;">Foto {{ $photoIndex + 1 }} de {{ count($problem['photos']) }}</p>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                    <p style="font-size: 9px; margin-top: 5px; font-style: italic;">
+                        Total: {{ count($problem['photos']) }} foto(s) registrada(s) na entrada do aparelho.
+                    </p>
+                @else
+                    <p style="font-size: 9px; font-style: italic;">Nenhuma foto registrada para este problema.</p>
+                @endif
             </div>
         @endforeach
-        
-        <div style="background: #fffbcc; padding: 10px; border-left: 3px solid #ffcc00; margin-top: 10px;">
-            <p style="font-size: 9px; margin: 0;">
-                <strong>⚠️ Importante:</strong> As fotos ficam armazenadas de forma segura e podem ser acessadas 
-                a qualquer momento através do link ou QR Code acima. Recomendamos salvar este documento para 
-                referência futura.
-            </p>
-        </div>
+        <p style="font-size: 8px; margin-top: 10px; text-align: center; font-style: italic;">
+            * Fotos registradas no momento da entrada do aparelho para documentação do estado inicial.
+        </p>
     </div>
     @endif
 
