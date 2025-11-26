@@ -29,6 +29,7 @@
                             <option value="">Selecione...</option>
                             @foreach($customers as $customer)
                                 <option value="{{ $customer->id }}" 
+                                        data-document="{{ $customer->document ?? '' }}"
                                         {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
                                     {{ $customer->name }} - {{ $customer->phone }}
                                 </option>
@@ -320,6 +321,35 @@
 
 @push('scripts')
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Preencher automaticamente o documento do cliente quando selecionado
+    const customerSelect = document.getElementById('customer_id');
+    const documentInput = document.getElementById('customer_document');
+    
+    if (!customerSelect || !documentInput) {
+        console.error('Elementos não encontrados:', { customerSelect, documentInput });
+        return;
+    }
+    
+    customerSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const customerDocument = selectedOption.getAttribute('data-document');
+        
+        console.log('Cliente selecionado:', {
+            value: this.value,
+            document: customerDocument
+        });
+        
+        if (customerDocument && customerDocument.trim() !== '') {
+            documentInput.value = customerDocument;
+        } else {
+            documentInput.value = '999999999999';
+        }
+    });
+    
+    console.log('Event listener de documento adicionado com sucesso');
+});
+
 // Lista de problemas predefinidos
 const problemsDatabase = [
     // Tela
