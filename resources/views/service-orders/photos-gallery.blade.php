@@ -1,275 +1,222 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fotos da OS #{{ $order->id }} - {{ config('app.name') }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Fotos da OS - {{ config('app.name') }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        :root {
-            --primary-color: #1a1a2e;
-            --secondary-color: #16213e;
-            --accent-color: #0f3460;
-            --text-light: #e94560;
-        }
-        
-        body {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-            padding: 2rem 0;
-            margin-bottom: 2rem;
-        }
-        
-        .header h1 {
-            color: white;
-            font-weight: 700;
+        * {
             margin: 0;
-            font-size: 2rem;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        .header .os-info {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1rem;
-            margin-top: 0.5rem;
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #f5f5f5;
         }
-        
-        .problem-section {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+        .header {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
-        .problem-title {
-            color: var(--primary-color);
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 3px solid var(--text-light);
+
+        .header h1 {
+            font-size: 24px;
+            color: #333;
         }
-        
-        .photo-grid {
+
+        .info {
+            margin-top: 10px;
+            color: #666;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .problem {
+            background: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .problem h2 {
+            color: #d32f2f;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
         }
-        
+
         .photo-card {
             position: relative;
-            border-radius: 10px;
+            aspect-ratio: 1;
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            background: white;
-        }
-        
-        .photo-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-        
-        .photo-card img {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
+            border-radius: 8px;
             cursor: pointer;
         }
-        
-        .photo-label {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-            color: white;
-            padding: 1rem 0.75rem 0.5rem;
-            font-size: 0.9rem;
-            font-weight: 500;
+
+        .photo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
         }
-        
-        .download-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
+
+        .photo-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+        }
+
+        .lightbox.active {
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
-        
-        .download-btn:hover {
-            background: white;
-            transform: scale(1.1);
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 8px;
         }
-        
-        .download-btn i {
-            color: var(--primary-color);
-            font-size: 1.2rem;
-        }
-        
-        .no-photos {
-            text-align: center;
-            padding: 3rem;
-            color: #666;
-        }
-        
-        .no-photos i {
-            font-size: 4rem;
-            color: #ddd;
-            margin-bottom: 1rem;
-        }
-        
-        /* Modal de visualização */
-        .modal-content {
-            background: transparent;
-            border: none;
-        }
-        
-        .modal-body {
-            padding: 0;
-            position: relative;
-        }
-        
-        .modal-body img {
-            width: 100%;
-            height: auto;
-            border-radius: 10px;
-        }
-        
-        .modal-header {
-            border: none;
+
+        .lightbox-close {
             position: absolute;
-            top: 0;
-            right: 0;
-            z-index: 10;
-        }
-        
-        .btn-close {
+            top: 20px;
+            right: 20px;
             background: white;
-            opacity: 1;
-            border-radius: 50%;
+            border: none;
             width: 40px;
             height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
         }
-        
+
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .lightbox-nav.prev {
+            left: 20px;
+        }
+
+        .lightbox-nav.next {
+            right: 20px;
+        }
+
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.5rem;
-            }
-            
-            .problem-section {
-                padding: 1.5rem;
-            }
-            
-            .photo-grid {
+            .grid {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 1rem;
-            }
-            
-            .photo-card img {
-                height: 150px;
+                gap: 10px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="header">
-        <div class="container">
-            <h1><i class="bi bi-images"></i> Galeria de Fotos</h1>
-            <div class="os-info">
-                <strong>OS #{{ $order->id }}</strong> | 
-                Cliente: {{ $order->customer_name }} | 
-                Aparelho: {{ $order->device_model }}
-            </div>
+        <h1><i class="bi bi-images"></i> Galeria de Fotos - OS #{{ $order->id }}</h1>
+        <div class="info">
+            <span><i class="bi bi-person"></i> {{ $order->customer->name }}</span> |
+            <span><i class="bi bi-phone"></i> {{ $order->device_model }}</span>
         </div>
     </div>
 
-    <div class="container pb-5">
+    <div class="container">
         @if($order->problems_photos && count($order->problems_photos) > 0)
-            @foreach($order->problems_photos as $problemIndex => $problem)
-                <div class="problem-section">
-                    <h2 class="problem-title">
-                        <i class="bi bi-exclamation-circle-fill text-danger"></i>
-                        {{ $problem['description'] ?? 'Problema sem descrição' }}
-                    </h2>
-                    
-                    @if(isset($problem['photos']) && count($problem['photos']) > 0)
-                        <div class="photo-grid">
-                            @foreach($problem['photos'] as $photoIndex => $photoPath)
-                                @php
-                                    $fullPath = public_path('storage/' . $photoPath);
-                                @endphp
-                                
-                                @if(file_exists($fullPath))
-                                    <div class="photo-card">
-                                        <img src="{{ asset('storage/' . $photoPath) }}" 
-                                             alt="Foto {{ $photoIndex + 1 }}"
-                                             data-bs-toggle="modal" 
-                                             data-bs-target="#photoModal{{ $problemIndex }}_{{ $photoIndex }}">
-                                        
-                                        <div class="photo-label">
-                                            Foto {{ $photoIndex + 1 }} de {{ count($problem['photos']) }}
-                                        </div>
-                                        
-                                        <a href="{{ asset('storage/' . $photoPath) }}" 
-                                           download 
-                                           class="download-btn"
-                                           title="Baixar foto">
-                                            <i class="bi bi-download"></i>
-                                        </a>
-                                    </div>
-                                    
-                                    <!-- Modal para visualização ampliada -->
-                                    <div class="modal fade" id="photoModal{{ $problemIndex }}_{{ $photoIndex }}" tabindex="-1">
-                                        <div class="modal-dialog modal-dialog-centered modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <img src="{{ asset('storage/' . $photoPath) }}" alt="Foto {{ $photoIndex + 1 }}">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="no-photos">
-                            <i class="bi bi-image"></i>
-                            <p>Nenhuma foto anexada para este problema.</p>
-                        </div>
-                    @endif
+        @foreach($order->problems_photos as $problemIndex => $problem)
+        <div class="problem">
+            <h2><i class="bi bi-exclamation-circle"></i> {{ $problem['description'] ?? 'Problema' }}</h2>
+            @if(isset($problem['photos']) && count($problem['photos']) > 0)
+            <div class="grid">
+                @foreach($problem['photos'] as $photoIndex => $photoPath)
+                @php
+                $fullPath = storage_path('app/public/' . $photoPath);
+                @endphp
+                @if(file_exists($fullPath))
+                <div class="photo-card" onclick="openLightbox('{{ asset('storage/' . $photoPath) }}')">
+                    <img src="{{ asset('storage/' . $photoPath) }}" alt="Foto {{ $photoIndex + 1 }}" loading="lazy">
                 </div>
-            @endforeach
-        @else
-            <div class="problem-section">
-                <div class="no-photos">
-                    <i class="bi bi-images"></i>
-                    <p>Nenhum problema com fotos registrado para esta OS.</p>
-                </div>
+                @endif
+                @endforeach
             </div>
+            @endif
+        </div>
+        @endforeach
+        @else
+        <div class="problem">
+            <p style="text-align: center; color: #666;">Nenhuma foto registrada para esta OS.</p>
+        </div>
         @endif
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <button class="lightbox-close" onclick="closeLightbox()"><i class="bi bi-x"></i></button>
+        <button class="lightbox-nav prev" onclick="navigate(-1); event.stopPropagation()"><i class="bi bi-chevron-left"></i></button>
+        <img id="lightboxImg" src="" alt="">
+        <button class="lightbox-nav next" onclick="navigate(1); event.stopPropagation()"><i class="bi bi-chevron-right"></i></button>
+    </div>
+
+    <script>
+        let photos = [];
+        let currentIndex = 0;
+        document.querySelectorAll('.photo-card img').forEach(img => photos.push(img.src));
+
+        function openLightbox(src) {
+            currentIndex = photos.indexOf(src);
+            document.getElementById('lightboxImg').src = src;
+            document.getElementById('lightbox').classList.add('active');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
+        function navigate(dir) {
+            currentIndex = (currentIndex + dir + photos.length) % photos.length;
+            document.getElementById('lightboxImg').src = photos[currentIndex];
+        }
+        document.addEventListener('keydown', e => {
+            if (document.getElementById('lightbox').classList.contains('active')) {
+                if (e.key === 'Escape') closeLightbox();
+                else if (e.key === 'ArrowLeft') navigate(-1);
+                else if (e.key === 'ArrowRight') navigate(1);
+            }
+        });
+    </script>
 </body>
+
 </html>

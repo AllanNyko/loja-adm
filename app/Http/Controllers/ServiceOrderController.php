@@ -22,17 +22,17 @@ class ServiceOrderController extends Controller
         if ($request->filled('search')) {
             $search = trim($request->search);
             if ($search !== '') {
-                $query->where(function($q) use ($search) {
-                    $q->whereHas('customer', function($customerQuery) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('customer', function ($customerQuery) use ($search) {
                         $customerQuery->where('name', 'like', '%' . $search . '%');
                     })
-                    ->orWhere('customer_document', 'like', '%' . $search . '%');
+                        ->orWhere('customer_document', 'like', '%' . $search . '%');
                 });
             }
         }
 
         $serviceOrders = $query->paginate(15);
-        
+
         return view('service-orders.index', compact('serviceOrders'));
     }
 
@@ -42,13 +42,13 @@ class ServiceOrderController extends Controller
         $manufacturers = array_keys(config('devices'));
         return view('service-orders.create', compact('customers', 'manufacturers'));
     }
-    
+
     public function searchDevices(Request $request)
     {
         $search = $request->get('q', '');
         $devices = config('devices');
         $results = [];
-        
+
         if (strlen($search) >= 1) {
             foreach ($devices as $manufacturer => $models) {
                 foreach ($models as $model) {
@@ -62,15 +62,15 @@ class ServiceOrderController extends Controller
                 }
             }
         }
-        
+
         return response()->json(array_slice($results, 0, 20));
     }
-    
+
     public function getManufacturerModels($manufacturer)
     {
         $devices = config('devices');
         $models = $devices[$manufacturer] ?? [];
-        
+
         return response()->json($models);
     }
 
@@ -100,44 +100,44 @@ class ServiceOrderController extends Controller
         $problemsPhotos = [];
         if ($request->has('problems_data') && $request->input('problems_data')) {
             $problemsData = json_decode($request->input('problems_data'), true);
-            
+
             if ($problemsData && is_array($problemsData)) {
                 $customerDocument = preg_replace('/[^0-9]/', '', $validated['customer_document']);
-                
+
                 foreach ($problemsData as $problem) {
                     $photoPaths = [];
-                    
+
                     if (isset($problem['photos']) && is_array($problem['photos'])) {
                         foreach ($problem['photos'] as $index => $photoBase64) {
                             // Extrair dados da imagem base64
                             if (preg_match('/^data:image\/(\w+);base64,/', $photoBase64, $type)) {
                                 $photoBase64 = substr($photoBase64, strpos($photoBase64, ',') + 1);
                                 $type = strtolower($type[1]); // jpg, png, gif, etc
-                                
+
                                 $photoData = base64_decode($photoBase64);
-                                
+
                                 if ($photoData !== false) {
                                     // Criar diretório se não existir
                                     $directory = storage_path('app/public/service-orders-photos');
                                     if (!file_exists($directory)) {
                                         mkdir($directory, 0755, true);
                                     }
-                                    
+
                                     // Nome único: os_{cpf}_{timestamp}_{random}.{ext}
                                     $timestamp = now()->format('YmdHis');
                                     $filename = "os_{$customerDocument}_{$timestamp}_" . uniqid() . ".{$type}";
                                     $filepath = $directory . '/' . $filename;
-                                    
+
                                     // Salvar arquivo
                                     file_put_contents($filepath, $photoData);
-                                    
+
                                     // Guardar caminho relativo
                                     $photoPaths[] = 'service-orders-photos/' . $filename;
                                 }
                             }
                         }
                     }
-                    
+
                     $problemsPhotos[] = [
                         'description' => $problem['description'] ?? 'Sem descrição',
                         'photos' => $photoPaths
@@ -150,7 +150,7 @@ class ServiceOrderController extends Controller
 
         // Calcular final_cost
         $subtotal = ($validated['price'] ?? 0) + ($validated['parts_cost'] ?? 0) + ($validated['extra_cost_value'] ?? 0);
-        
+
         $discountAmount = 0;
         if (isset($validated['discount_value']) && $validated['discount_value'] > 0) {
             if (($validated['discount_type'] ?? 'amount') === 'percentage') {
@@ -159,8 +159,11 @@ class ServiceOrderController extends Controller
                 $discountAmount = $validated['discount_value'];
             }
         }
-        
+
         $validated['final_cost'] = $subtotal - $discountAmount;
+
+        // Gerar hash único para PDF e galeria de fotos
+        $validated['pdf_hash'] = hash('sha256', time() . uniqid() . rand(1000, 9999));
 
         ServiceOrder::create($validated);
 
@@ -240,7 +243,7 @@ class ServiceOrderController extends Controller
     public function exportPdf(ServiceOrder $serviceOrder)
     {
         $serviceOrder->load('customer');
-        
+
         $pdf = Pdf::loadView('service-orders.pdf', [
             'order' => $serviceOrder,
         ]);
@@ -251,7 +254,7 @@ class ServiceOrderController extends Controller
     public function exportClientPdf(ServiceOrder $serviceOrder)
     {
         $serviceOrder->load('customer');
-        
+
         $pdf = Pdf::loadView('service-orders.client-pdf', [
             'order' => $serviceOrder,
         ]);
@@ -265,37 +268,37 @@ class ServiceOrderController extends Controller
     public function sendToWhatsApp(ServiceOrder $serviceOrder)
     {
         $serviceOrder->load('customer');
-        
+
         // Gerar hash único se não existir
         if (!$serviceOrder->pdf_hash) {
             $serviceOrder->pdf_hash = hash('sha256', $serviceOrder->id . time() . uniqid());
             $serviceOrder->save();
         }
-        
+
         // Gerar PDF
         $pdf = Pdf::loadView('service-orders.client-pdf', [
             'order' => $serviceOrder,
         ]);
-        
+
         // Criar diretório se não existir
         $directory = storage_path('app/public/os-pdfs');
         if (!file_exists($directory)) {
             mkdir($directory, 0755, true);
         }
-        
+
         // Salvar PDF
         $filename = 'os-' . $serviceOrder->id . '-' . $serviceOrder->pdf_hash . '.pdf';
         $filepath = $directory . '/' . $filename;
         $pdf->save($filepath);
-        
+
         // Gerar URL de download usando domínio de produção
         $baseUrl = config('app.url');
         $downloadUrl = $baseUrl . '/os/download/' . $serviceOrder->pdf_hash;
         $photosUrl = $baseUrl . '/os/photos/' . $serviceOrder->pdf_hash;
-        
+
         // Preparar mensagem do WhatsApp (sem emojis para evitar problemas de codificação)
         $phone = preg_replace('/[^0-9]/', '', $serviceOrder->customer->phone); // Remove formatação
-        
+
         $message = "Ola *{$serviceOrder->customer->name}*!\n\n";
         $message .= "Agradecemos por escolher a *JD SMART*!\n\n";
         $message .= "Sua *Ordem de Servico #{$serviceOrder->id}* foi gerada com sucesso!\n\n";
@@ -303,20 +306,20 @@ class ServiceOrderController extends Controller
         $message .= "*Data:* " . $serviceOrder->created_at->format('d/m/Y H:i') . "\n\n";
         $message .= "Voce pode acessar:\n\n";
         $message .= "- Documento completo (PDF):\n{$downloadUrl}\n\n";
-        
+
         // Verificar se há fotos documentadas
         if ($serviceOrder->problems_photos && count($serviceOrder->problems_photos) > 0) {
             $totalProblems = count($serviceOrder->problems_photos);
             $message .= "- Galeria de Fotos ({$totalProblems} observações(s) documentado(s)):\n{$photosUrl}\n\n";
         }
-        
+
         $message .= "_Estes links ficarao disponiveis para voce consultar sempre que precisar!_\n\n";
         $message .= "Em caso de duvidas, estamos a disposicao!\n";
         $message .= "Telefone: (13) 99784-1161";
-        
+
         // Gerar link do WhatsApp
         $whatsappUrl = "https://wa.me/{$phone}?text=" . urlencode($message);
-        
+
         return redirect($whatsappUrl);
     }
 
@@ -327,29 +330,29 @@ class ServiceOrderController extends Controller
     {
         // Buscar ordem de serviço pelo hash
         $serviceOrder = ServiceOrder::where('pdf_hash', $hash)->first();
-        
+
         if (!$serviceOrder) {
             abort(404, 'Documento não encontrado');
         }
-        
+
         $filename = 'os-' . $serviceOrder->id . '-' . $hash . '.pdf';
         $filepath = storage_path('app/public/os-pdfs/' . $filename);
-        
+
         // Se o arquivo não existir, gerar novamente
         if (!file_exists($filepath)) {
             $serviceOrder->load('customer');
             $pdf = Pdf::loadView('service-orders.client-pdf', [
                 'order' => $serviceOrder,
             ]);
-            
+
             $directory = storage_path('app/public/os-pdfs');
             if (!file_exists($directory)) {
                 mkdir($directory, 0755, true);
             }
-            
+
             $pdf->save($filepath);
         }
-        
+
         return response()->download($filepath, 'Ordem-Servico-' . $serviceOrder->id . '-JDSmart.pdf');
     }
 
@@ -379,11 +382,11 @@ class ServiceOrderController extends Controller
     {
         // Buscar ordem de serviço pelo hash
         $serviceOrder = ServiceOrder::where('pdf_hash', $hash)->first();
-        
+
         if (!$serviceOrder) {
             abort(404, 'Galeria não encontrada');
         }
-        
+
         return view('service-orders.photos-gallery', [
             'order' => $serviceOrder
         ]);
