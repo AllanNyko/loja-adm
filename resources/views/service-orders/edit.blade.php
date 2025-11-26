@@ -64,11 +64,11 @@
                     <div class="row">
                         <div class="col-12 col-md-6 mb-3">
                             <label for="manufacturer" class="form-label fw-bold">Fabricante *</label>
-                            <select name="manufacturer" id="manufacturer" class="form-select form-select-lg @error('manufacturer') is-invalid @enderror">
+                            <select name="manufacturer" id="manufacturer" class="form-select form-select-lg @error('manufacturer') is-invalid @enderror" required>
                                 <option value="">Selecione o fabricante...</option>
-                                @foreach($manufacturers as $manufacturer)
-                                    <option value="{{ $manufacturer }}" {{ old('manufacturer', $serviceOrder->manufacturer) == $manufacturer ? 'selected' : '' }}>
-                                        {{ $manufacturer }}
+                                @foreach($manufacturers as $mfr)
+                                    <option value="{{ $mfr }}" {{ old('manufacturer', $serviceOrder->manufacturer) == $mfr ? 'selected' : '' }}>
+                                        {{ $mfr }}
                                     </option>
                                 @endforeach
                             </select>
@@ -80,7 +80,11 @@
                         <div class="col-12 col-md-6 mb-3">
                             <label for="device_model" class="form-label fw-bold">Modelo do Dispositivo *</label>
                             <select name="device_model" id="device_model" class="form-select form-select-lg @error('device_model') is-invalid @enderror" required>
-                                <option value="">Primeiro selecione o fabricante...</option>
+                                @if($serviceOrder->device_model)
+                                    <option value="{{ $serviceOrder->device_model }}" selected>{{ $serviceOrder->device_model }}</option>
+                                @else
+                                    <option value="">Primeiro selecione o fabricante...</option>
+                                @endif
                             </select>
                             @error('device_model')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -250,6 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Modelo atual da OS
     const currentModel = '{{ old("device_model", $serviceOrder->device_model) }}';
+    const currentManufacturer = '{{ old("manufacturer", $serviceOrder->manufacturer) }}';
     
     // Carregar modelos quando fabricante mudar
     manufacturerSelect.addEventListener('change', function() {
@@ -282,11 +287,13 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => {
                 console.error('Erro ao carregar modelos:', error);
                 modelSelect.innerHTML = '<option value="">Erro ao carregar modelos</option>';
+                modelSelect.disabled = false;
             });
     });
     
     // Carregar modelos iniciais se fabricante já estiver selecionado
-    if (manufacturerSelect.value) {
+    if (manufacturerSelect.value && currentManufacturer) {
+        // Disparar o evento de change para carregar os modelos do fabricante atual
         manufacturerSelect.dispatchEvent(new Event('change'));
     }
     
