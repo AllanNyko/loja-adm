@@ -14,10 +14,10 @@ class CustomerController extends Controller
         // Busca por nome, email ou telefone
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
             });
         }
 
@@ -73,5 +73,35 @@ class CustomerController extends Controller
 
         return redirect()->route('customers.index')
             ->with('success', 'Cliente removido com sucesso!');
+    }
+
+    /**
+     * Buscar clientes por nome ou telefone (API para autocomplete)
+     */
+    public function searchCustomers(Request $request)
+    {
+        $query = $request->input('q', '');
+
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $customers = Customer::where(function ($q) use ($query) {
+            $q->where('name', 'like', "%{$query}%")
+                ->orWhere('phone', 'like', "%{$query}%");
+        })
+            ->limit(10)
+            ->get(['id', 'name', 'phone', 'document'])
+            ->map(function ($customer) {
+                return [
+                    'id' => $customer->id,
+                    'name' => $customer->name,
+                    'phone' => $customer->phone,
+                    'document' => $customer->document ?? '',
+                    'label' => $customer->name . ' - ' . $customer->phone
+                ];
+            });
+
+        return response()->json($customers);
     }
 }

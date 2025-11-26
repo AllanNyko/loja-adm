@@ -48,6 +48,8 @@ Route::middleware(['auth'])->group(function () {
         ->name('api.devices.search');
     Route::get('/api/devices/{manufacturer}/models', [ServiceOrderController::class, 'getManufacturerModels'])
         ->name('api.devices.models');
+    Route::get('/api/customers/search', [CustomerController::class, 'searchCustomers'])
+        ->name('api.customers.search');
 
     // Sales
     Route::resource('sales', SaleController::class)->except(['edit', 'update']);
@@ -66,4 +68,4 @@ Route::middleware(['auth'])->group(function () {
         ->name('expenses.mark-as-paid');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

@@ -5,13 +5,17 @@
 
 @push('styles')
 <style>
-#device_suggestions {
-    max-width: 100%;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-#device_suggestions .list-group-item:hover {
-    background-color: #f8f9fa;
-}
+    #device_suggestions,
+    #customer_suggestions {
+        max-width: 100%;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #device_suggestions .list-group-item:hover,
+    #customer_suggestions .list-group-item:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
 </style>
 @endpush
 
@@ -23,36 +27,49 @@
                 <form action="{{ route('service-orders.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
+                    <!-- Campo de Busca de Cliente -->
+                    <div class="mb-3">
+                        <label for="customer_search" class="form-label fw-bold">
+                            <i class="bi bi-search"></i> Buscar Cliente
+                        </label>
+                        <input type="text"
+                            id="customer_search"
+                            class="form-control form-control-lg"
+                            placeholder="Digite o nome ou telefone do cliente para buscar..."
+                            autocomplete="off">
+                        <div id="customer_suggestions" class="list-group mt-1" style="display: none; position: absolute; z-index: 1000; max-height: 300px; overflow-y: auto;"></div>
+                        <small class="text-muted">Digite pelo menos 2 caracteres para buscar rapidamente</small>
+                    </div>
+
                     <div class="mb-3">
                         <label for="customer_id" class="form-label fw-bold">Cliente *</label>
                         <select name="customer_id" id="customer_id" class="form-select form-select-lg @error('customer_id') is-invalid @enderror" required>
                             <option value="">Selecione...</option>
                             @foreach($customers as $customer)
-                                <option value="{{ $customer->id }}" 
-                                        data-document="{{ $customer->document ?? '' }}"
-                                        {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
-                                    {{ $customer->name }} - {{ $customer->phone }}
-                                </option>
+                            <option value="{{ $customer->id }}"
+                                data-document="{{ $customer->document ?? '' }}"
+                                {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
+                                {{ $customer->name }} - {{ $customer->phone }}
+                            </option>
                             @endforeach
                         </select>
                         @error('customer_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <small class="text-muted d-block mt-1">
                             Não encontrou? <a href="{{ route('customers.create') }}" target="_blank">Cadastre um novo cliente</a>
                         </small>
                     </div>
-
                     <div class="mb-3">
                         <label for="customer_document" class="form-label fw-bold">CPF/CNPJ do Cliente *</label>
-                        <input type="text" name="customer_document" id="customer_document" 
-                               class="form-control form-control-lg @error('customer_document') is-invalid @enderror" 
-                               value="{{ old('customer_document') }}" 
-                               placeholder="000.000.000-00 ou 00.000.000/0000-00" 
-                               required 
-                               maxlength="20">
+                        <input type="text" name="customer_document" id="customer_document"
+                            class="form-control form-control-lg @error('customer_document') is-invalid @enderror"
+                            value="{{ old('customer_document') }}"
+                            placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                            required
+                            maxlength="20">
                         @error('customer_document')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <small class="text-muted">Digite o CPF ou CNPJ do cliente para amarrar o aparelho juridicamente</small>
                     </div>
@@ -71,13 +88,13 @@
                             <select name="manufacturer" id="manufacturer" class="form-select form-select-lg @error('manufacturer') is-invalid @enderror">
                                 <option value="">Selecione o fabricante...</option>
                                 @foreach($manufacturers as $manufacturer)
-                                    <option value="{{ $manufacturer }}" {{ old('manufacturer') == $manufacturer ? 'selected' : '' }}>
-                                        {{ $manufacturer }}
-                                    </option>
+                                <option value="{{ $manufacturer }}" {{ old('manufacturer') == $manufacturer ? 'selected' : '' }}>
+                                    {{ $manufacturer }}
+                                </option>
                                 @endforeach
                             </select>
                             @error('manufacturer')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -87,7 +104,7 @@
                                 <option value="">Primeiro selecione o fabricante...</option>
                             </select>
                             @error('device_model')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
@@ -96,7 +113,7 @@
                         <label for="device_imei" class="form-label fw-bold">IMEI</label>
                         <input type="text" name="device_imei" id="device_imei" class="form-control form-control-lg @error('device_imei') is-invalid @enderror" value="{{ old('device_imei') }}" placeholder="Opcional">
                         @error('device_imei')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -104,7 +121,7 @@
                         <label for="problem_description" class="form-label fw-bold">Descrição do Problema *</label>
                         <textarea name="problem_description" id="problem_description" rows="4" class="form-control form-control-lg @error('problem_description') is-invalid @enderror" required placeholder="Descreva o problema relatado pelo cliente">{{ old('problem_description') }}</textarea>
                         @error('problem_description')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -116,7 +133,7 @@
                                 <input type="number" step="0.01" name="price" id="price" class="form-control @error('price') is-invalid @enderror" value="{{ old('price', '0.00') }}" required>
                             </div>
                             @error('price')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -127,7 +144,7 @@
                                 <input type="number" step="0.01" name="parts_cost" id="parts_cost" class="form-control @error('parts_cost') is-invalid @enderror" value="{{ old('parts_cost', '0.00') }}" placeholder="0.00">
                             </div>
                             @error('parts_cost')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <small class="text-muted">Custo total das peças necessárias para o reparo</small>
                         </div>
@@ -151,7 +168,7 @@
                                 <input type="number" step="0.01" name="extra_cost_value" id="extra_cost_value" class="form-control @error('extra_cost_value') is-invalid @enderror" value="{{ old('extra_cost_value', '0.00') }}" placeholder="0.00">
                             </div>
                             @error('extra_cost_value')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <small class="text-muted">Ex: taxa de motoboy, frete, etc.</small>
                         </div>
@@ -163,15 +180,15 @@
                         <p class="text-muted small mb-3">
                             <i class="bi bi-info-circle"></i> Documente os problemas encontrados com fotos para resguardar a loja.
                         </p>
-                        
+
                         <div class="border rounded p-3 bg-light">
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProblemModal">
                                 <i class="bi bi-plus-circle"></i> Adicionar Problema com Fotos
                             </button>
-                            
+
                             <!-- Lista de problemas adicionados -->
                             <div id="problemsList" class="mt-3"></div>
-                            
+
                             <!-- Input hidden para enviar os dados -->
                             <input type="hidden" name="problems_data" id="problems_data">
                         </div>
@@ -181,7 +198,7 @@
                         <label for="diagnostic" class="form-label fw-bold">Diagnóstico Técnico</label>
                         <textarea name="diagnostic" id="diagnostic" rows="3" class="form-control form-control-lg @error('diagnostic') is-invalid @enderror" placeholder="Opcional - Diagnóstico após análise">{{ old('diagnostic') }}</textarea>
                         @error('diagnostic')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -193,7 +210,7 @@
                                 <input type="number" step="0.01" name="estimated_cost" id="estimated_cost" class="form-control bg-light @error('estimated_cost') is-invalid @enderror" value="{{ old('estimated_cost', '0.00') }}" placeholder="0.00" readonly>
                             </div>
                             @error('estimated_cost')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <small class="text-muted">Calculado automaticamente (Mão de Obra + Peças + Custo Extra)</small>
                         </div>
@@ -202,7 +219,7 @@
                             <label for="deadline" class="form-label fw-bold">Prazo de Entrega</label>
                             <input type="date" name="deadline" id="deadline" class="form-control form-control-lg @error('deadline') is-invalid @enderror" value="{{ old('deadline') }}">
                             @error('deadline')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
@@ -253,7 +270,7 @@
                         <label for="notes" class="form-label fw-bold">Observações</label>
                         <textarea name="notes" id="notes" rows="2" class="form-control form-control-lg @error('notes') is-invalid @enderror" placeholder="Informações adicionais">{{ old('notes') }}</textarea>
                         @error('notes')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -288,7 +305,7 @@
                     <input type="text" id="problemSearch" class="form-control form-control-lg" placeholder="Digite para pesquisar (ex: tela, bateria, câmera...)" autocomplete="off">
                     <div id="problemSuggestions" class="list-group mt-2" style="display: none; max-height: 200px; overflow-y: auto;"></div>
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="problemDescription" class="form-label fw-bold">Descrição do Problema</label>
                     <input type="text" id="problemDescription" class="form-control form-control-lg" placeholder="Ex: Tela trincada e não funcional" readonly>
@@ -321,172 +338,307 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Preencher automaticamente o documento do cliente quando selecionado
-    const customerSelect = document.getElementById('customer_id');
-    const documentInput = document.getElementById('customer_document');
-    
-    if (!customerSelect || !documentInput) {
-        console.error('Elementos não encontrados:', { customerSelect, documentInput });
-        return;
-    }
-    
-    customerSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const customerDocument = selectedOption.getAttribute('data-document');
-        
-        console.log('Cliente selecionado:', {
-            value: this.value,
-            document: customerDocument
-        });
-        
-        if (customerDocument && customerDocument.trim() !== '') {
-            documentInput.value = customerDocument;
-        } else {
-            documentInput.value = '999999999999';
+    document.addEventListener('DOMContentLoaded', function() {
+        // Preencher automaticamente o documento do cliente quando selecionado
+        const customerSelect = document.getElementById('customer_id');
+        const documentInput = document.getElementById('customer_document');
+
+        if (!customerSelect || !documentInput) {
+            console.error('Elementos não encontrados:', {
+                customerSelect,
+                documentInput
+            });
+            return;
         }
+
+        customerSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const customerDocument = selectedOption.getAttribute('data-document');
+
+            console.log('Cliente selecionado:', {
+                value: this.value,
+                document: customerDocument
+            });
+
+            if (customerDocument && customerDocument.trim() !== '') {
+                documentInput.value = customerDocument;
+            } else {
+                documentInput.value = '999999999999';
+            }
+        });
+
+        console.log('Event listener de documento adicionado com sucesso');
     });
-    
-    console.log('Event listener de documento adicionado com sucesso');
-});
 
-// Lista de problemas predefinidos
-const problemsDatabase = [
-    // Tela
-    { category: 'Tela', problem: 'Tela trincada e funcional' },
-    { category: 'Tela', problem: 'Tela trincada e não funcional' },
-    { category: 'Tela', problem: 'Tela com manchas/pixels mortos' },
-    { category: 'Tela', problem: 'Tela riscada' },
-    { category: 'Tela', problem: 'Touch não funciona' },
-    { category: 'Tela', problem: 'Tela com brilho fraco' },
-    
-    // Bateria
-    { category: 'Bateria', problem: 'Bateria viciada/não segura carga' },
-    { category: 'Bateria', problem: 'Bateria estufada' },
-    { category: 'Bateria', problem: 'Aparelho não liga sem carregador' },
-    { category: 'Bateria', problem: 'Descarrega rápido' },
-    
-    // Câmera
-    { category: 'Câmera', problem: 'Câmera frontal não funciona' },
-    { category: 'Câmera', problem: 'Câmera traseira não funciona' },
-    { category: 'Câmera', problem: 'Câmera embaçada/manchada' },
-    { category: 'Câmera', problem: 'Vidro da câmera quebrado' },
-    { category: 'Câmera', problem: 'Flash não funciona' },
-    
-    // Carcaça/Estrutura
-    { category: 'Carcaça', problem: 'Tampa traseira trincada/quebrada' },
-    { category: 'Carcaça', problem: 'Carcaça amassada' },
-    { category: 'Carcaça', problem: 'Riscos na carcaça' },
-    { category: 'Carcaça', problem: 'Aparelho torto/empenado' },
-    
-    // Botões
-    { category: 'Botões', problem: 'Botão Power não funciona' },
-    { category: 'Botões', problem: 'Botões de volume não funcionam' },
-    { category: 'Botões', problem: 'Botão Home não funciona' },
-    { category: 'Botões', problem: 'Botão mudo/silencioso não funciona' },
-    
-    // Conectores
-    { category: 'Conectores', problem: 'Conector de carga não funciona' },
-    { category: 'Conectores', problem: 'Entrada de fone não funciona' },
-    { category: 'Conectores', problem: 'Não reconhece carregador' },
-    { category: 'Conectores', problem: 'Carrega apenas em determinadas posições' },
-    
-    // Áudio
-    { category: 'Áudio', problem: 'Alto-falante não funciona' },
-    { category: 'Áudio', problem: 'Microfone não funciona' },
-    { category: 'Áudio', problem: 'Áudio chiado/com ruído' },
-    { category: 'Áudio', problem: 'Fone de ouvido não funciona' },
-    
-    // Sistema
-    { category: 'Sistema', problem: 'Aparelho não liga' },
-    { category: 'Sistema', problem: 'Aparelho reinicia sozinho' },
-    { category: 'Sistema', problem: 'Travando/lento' },
-    { category: 'Sistema', problem: 'Não reconhece chip' },
-    { category: 'Sistema', problem: 'Sem sinal/antena' },
-    { category: 'Sistema', problem: 'WiFi não funciona' },
-    { category: 'Sistema', problem: 'Bluetooth não funciona' },
-    
-    // Contato com Líquido
-    { category: 'Líquido', problem: 'Aparelho molhado - oxidado' },
-    { category: 'Líquido', problem: 'Marcas de oxidação visíveis' },
-    
-    // Outros
-    { category: 'Outros', problem: 'Biometria não funciona' },
-    { category: 'Outros', problem: 'Face ID não funciona' },
-    { category: 'Outros', problem: 'NFC não funciona' },
-    { category: 'Outros', problem: 'GPS não funciona' },
-];
+    // Lista de problemas predefinidos
+    const problemsDatabase = [
+        // Tela
+        {
+            category: 'Tela',
+            problem: 'Tela trincada e funcional'
+        },
+        {
+            category: 'Tela',
+            problem: 'Tela trincada e não funcional'
+        },
+        {
+            category: 'Tela',
+            problem: 'Tela com manchas/pixels mortos'
+        },
+        {
+            category: 'Tela',
+            problem: 'Tela riscada'
+        },
+        {
+            category: 'Tela',
+            problem: 'Touch não funciona'
+        },
+        {
+            category: 'Tela',
+            problem: 'Tela com brilho fraco'
+        },
 
-// Gerenciamento de problemas
-let problemsArray = [];
-let currentProblemPhotos = [];
+        // Bateria
+        {
+            category: 'Bateria',
+            problem: 'Bateria viciada/não segura carga'
+        },
+        {
+            category: 'Bateria',
+            problem: 'Bateria estufada'
+        },
+        {
+            category: 'Bateria',
+            problem: 'Aparelho não liga sem carregador'
+        },
+        {
+            category: 'Bateria',
+            problem: 'Descarrega rápido'
+        },
 
-// Função para remover acentuação
-function removeAccents(str) {
-    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-}
+        // Câmera
+        {
+            category: 'Câmera',
+            problem: 'Câmera frontal não funciona'
+        },
+        {
+            category: 'Câmera',
+            problem: 'Câmera traseira não funciona'
+        },
+        {
+            category: 'Câmera',
+            problem: 'Câmera embaçada/manchada'
+        },
+        {
+            category: 'Câmera',
+            problem: 'Vidro da câmera quebrado'
+        },
+        {
+            category: 'Câmera',
+            problem: 'Flash não funciona'
+        },
 
-// Pesquisa de problemas
-document.getElementById('problemSearch').addEventListener('input', function(e) {
-    const search = removeAccents(e.target.value.toLowerCase());
-    const suggestions = document.getElementById('problemSuggestions');
-    
-    if (search.length < 2) {
-        suggestions.style.display = 'none';
-        return;
+        // Carcaça/Estrutura
+        {
+            category: 'Carcaça',
+            problem: 'Tampa traseira trincada/quebrada'
+        },
+        {
+            category: 'Carcaça',
+            problem: 'Carcaça amassada'
+        },
+        {
+            category: 'Carcaça',
+            problem: 'Riscos na carcaça'
+        },
+        {
+            category: 'Carcaça',
+            problem: 'Aparelho torto/empenado'
+        },
+
+        // Botões
+        {
+            category: 'Botões',
+            problem: 'Botão Power não funciona'
+        },
+        {
+            category: 'Botões',
+            problem: 'Botões de volume não funcionam'
+        },
+        {
+            category: 'Botões',
+            problem: 'Botão Home não funciona'
+        },
+        {
+            category: 'Botões',
+            problem: 'Botão mudo/silencioso não funciona'
+        },
+
+        // Conectores
+        {
+            category: 'Conectores',
+            problem: 'Conector de carga não funciona'
+        },
+        {
+            category: 'Conectores',
+            problem: 'Entrada de fone não funciona'
+        },
+        {
+            category: 'Conectores',
+            problem: 'Não reconhece carregador'
+        },
+        {
+            category: 'Conectores',
+            problem: 'Carrega apenas em determinadas posições'
+        },
+
+        // Áudio
+        {
+            category: 'Áudio',
+            problem: 'Alto-falante não funciona'
+        },
+        {
+            category: 'Áudio',
+            problem: 'Microfone não funciona'
+        },
+        {
+            category: 'Áudio',
+            problem: 'Áudio chiado/com ruído'
+        },
+        {
+            category: 'Áudio',
+            problem: 'Fone de ouvido não funciona'
+        },
+
+        // Sistema
+        {
+            category: 'Sistema',
+            problem: 'Aparelho não liga'
+        },
+        {
+            category: 'Sistema',
+            problem: 'Aparelho reinicia sozinho'
+        },
+        {
+            category: 'Sistema',
+            problem: 'Travando/lento'
+        },
+        {
+            category: 'Sistema',
+            problem: 'Não reconhece chip'
+        },
+        {
+            category: 'Sistema',
+            problem: 'Sem sinal/antena'
+        },
+        {
+            category: 'Sistema',
+            problem: 'WiFi não funciona'
+        },
+        {
+            category: 'Sistema',
+            problem: 'Bluetooth não funciona'
+        },
+
+        // Contato com Líquido
+        {
+            category: 'Líquido',
+            problem: 'Aparelho molhado - oxidado'
+        },
+        {
+            category: 'Líquido',
+            problem: 'Marcas de oxidação visíveis'
+        },
+
+        // Outros
+        {
+            category: 'Outros',
+            problem: 'Biometria não funciona'
+        },
+        {
+            category: 'Outros',
+            problem: 'Face ID não funciona'
+        },
+        {
+            category: 'Outros',
+            problem: 'NFC não funciona'
+        },
+        {
+            category: 'Outros',
+            problem: 'GPS não funciona'
+        },
+    ];
+
+    // Gerenciamento de problemas
+    let problemsArray = [];
+    let currentProblemPhotos = [];
+
+    // Função para remover acentuação
+    function removeAccents(str) {
+        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
-    
-    const results = problemsDatabase.filter(item => 
-        removeAccents(item.problem.toLowerCase()).includes(search) || 
-        removeAccents(item.category.toLowerCase()).includes(search)
-    );
-    
-    if (results.length === 0) {
-        suggestions.style.display = 'none';
-        // Permitir entrada manual
-        document.getElementById('problemDescription').value = e.target.value;
-        document.getElementById('problemDescription').readOnly = false;
-        return;
-    }
-    
-    suggestions.innerHTML = results.map(item => `
+
+    // Pesquisa de problemas
+    document.getElementById('problemSearch').addEventListener('input', function(e) {
+        const search = removeAccents(e.target.value.toLowerCase());
+        const suggestions = document.getElementById('problemSuggestions');
+
+        if (search.length < 2) {
+            suggestions.style.display = 'none';
+            return;
+        }
+
+        const results = problemsDatabase.filter(item =>
+            removeAccents(item.problem.toLowerCase()).includes(search) ||
+            removeAccents(item.category.toLowerCase()).includes(search)
+        );
+
+        if (results.length === 0) {
+            suggestions.style.display = 'none';
+            // Permitir entrada manual
+            document.getElementById('problemDescription').value = e.target.value;
+            document.getElementById('problemDescription').readOnly = false;
+            return;
+        }
+
+        suggestions.innerHTML = results.map(item => `
         <button type="button" class="list-group-item list-group-item-action" onclick="selectProblem('${item.problem}')">
             <strong>${item.category}:</strong> ${item.problem}
         </button>
     `).join('');
-    
-    suggestions.style.display = 'block';
-});
 
-function selectProblem(problem) {
-    document.getElementById('problemDescription').value = problem;
-    document.getElementById('problemDescription').readOnly = true;
-    document.getElementById('problemSuggestions').style.display = 'none';
-    document.getElementById('problemSearch').value = '';
-}
+        suggestions.style.display = 'block';
+    });
 
-// Preview de fotos no modal - PERMITE MÚLTIPLAS SELEÇÕES
-document.getElementById('problemPhotos').addEventListener('change', function(e) {
-    const preview = document.getElementById('modalPhotoPreview');
-    const files = Array.from(e.target.files);
-    
-    files.forEach((file) => {
-        if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                const photoIndex = currentProblemPhotos.length;
-                
-                currentProblemPhotos.push({
-                    file: file,
-                    dataUrl: e.target.result
-                });
-                
-                const col = document.createElement('div');
-                col.className = 'col-6 col-md-4';
-                col.id = 'photo-' + photoIndex;
-                
-                col.innerHTML = `
+    function selectProblem(problem) {
+        document.getElementById('problemDescription').value = problem;
+        document.getElementById('problemDescription').readOnly = true;
+        document.getElementById('problemSuggestions').style.display = 'none';
+        document.getElementById('problemSearch').value = '';
+    }
+
+    // Preview de fotos no modal - PERMITE MÚLTIPLAS SELEÇÕES
+    document.getElementById('problemPhotos').addEventListener('change', function(e) {
+        const preview = document.getElementById('modalPhotoPreview');
+        const files = Array.from(e.target.files);
+
+        files.forEach((file) => {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const photoIndex = currentProblemPhotos.length;
+
+                    currentProblemPhotos.push({
+                        file: file,
+                        dataUrl: e.target.result
+                    });
+
+                    const col = document.createElement('div');
+                    col.className = 'col-6 col-md-4';
+                    col.id = 'photo-' + photoIndex;
+
+                    col.innerHTML = `
                     <div class="position-relative">
                         <img src="${e.target.result}" class="img-fluid rounded border" alt="Foto ${photoIndex + 1}" style="height: 120px; object-fit: cover; width: 100%;">
                         <span class="badge bg-primary position-absolute top-0 end-0 m-1">${photoIndex + 1}</span>
@@ -495,33 +647,33 @@ document.getElementById('problemPhotos').addEventListener('change', function(e) 
                         </button>
                     </div>
                 `;
-                
-                preview.appendChild(col);
-            };
-            
-            reader.readAsDataURL(file);
-        }
+
+                    preview.appendChild(col);
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Limpar input para permitir adicionar mais fotos
+        this.value = '';
     });
-    
-    // Limpar input para permitir adicionar mais fotos
-    this.value = '';
-});
 
-// Remover foto individual
-function removePhoto(index) {
-    currentProblemPhotos.splice(index, 1);
-    updatePhotoPreview();
-}
+    // Remover foto individual
+    function removePhoto(index) {
+        currentProblemPhotos.splice(index, 1);
+        updatePhotoPreview();
+    }
 
-function updatePhotoPreview() {
-    const preview = document.getElementById('modalPhotoPreview');
-    preview.innerHTML = '';
-    
-    currentProblemPhotos.forEach((photo, index) => {
-        const col = document.createElement('div');
-        col.className = 'col-6 col-md-4';
-        
-        col.innerHTML = `
+    function updatePhotoPreview() {
+        const preview = document.getElementById('modalPhotoPreview');
+        preview.innerHTML = '';
+
+        currentProblemPhotos.forEach((photo, index) => {
+            const col = document.createElement('div');
+            col.className = 'col-6 col-md-4';
+
+            col.innerHTML = `
             <div class="position-relative">
                 <img src="${photo.dataUrl}" class="img-fluid rounded border" alt="Foto ${index + 1}" style="height: 120px; object-fit: cover; width: 100%;">
                 <span class="badge bg-primary position-absolute top-0 end-0 m-1">${index + 1}</span>
@@ -530,57 +682,57 @@ function updatePhotoPreview() {
                 </button>
             </div>
         `;
-        
-        preview.appendChild(col);
-    });
-}
 
-// Adicionar problema à lista
-document.getElementById('addProblemBtn').addEventListener('click', function() {
-    const description = document.getElementById('problemDescription').value.trim();
-    
-    if (!description) {
-        alert('Por favor, descreva o problema encontrado.');
-        return;
+            preview.appendChild(col);
+        });
     }
-    
-    if (currentProblemPhotos.length === 0) {
-        if (!confirm('Nenhuma foto foi adicionada. Deseja continuar mesmo assim?')) {
+
+    // Adicionar problema à lista
+    document.getElementById('addProblemBtn').addEventListener('click', function() {
+        const description = document.getElementById('problemDescription').value.trim();
+
+        if (!description) {
+            alert('Por favor, descreva o problema encontrado.');
             return;
         }
-    }
-    
-    // Adicionar ao array
-    problemsArray.push({
-        description: description,
-        photos: currentProblemPhotos.map(p => p.dataUrl),
-        photoFiles: currentProblemPhotos.map(p => p.file)
-    });
-    
-    // Atualizar lista visual
-    updateProblemsList();
-    
-    // Limpar modal
-    document.getElementById('problemDescription').value = '';
-    document.getElementById('problemSearch').value = '';
-    document.getElementById('problemPhotos').value = '';
-    document.getElementById('modalPhotoPreview').innerHTML = '';
-    currentProblemPhotos = [];
-    
-    // Fechar modal
-    bootstrap.Modal.getInstance(document.getElementById('addProblemModal')).hide();
-});
 
-function updateProblemsList() {
-    const list = document.getElementById('problemsList');
-    
-    if (problemsArray.length === 0) {
-        list.innerHTML = '<p class="text-muted small mb-0 mt-2">Nenhum problema registrado ainda.</p>';
-        document.getElementById('problems_data').value = '';
-        return;
-    }
-    
-    list.innerHTML = problemsArray.map((problem, index) => `
+        if (currentProblemPhotos.length === 0) {
+            if (!confirm('Nenhuma foto foi adicionada. Deseja continuar mesmo assim?')) {
+                return;
+            }
+        }
+
+        // Adicionar ao array
+        problemsArray.push({
+            description: description,
+            photos: currentProblemPhotos.map(p => p.dataUrl),
+            photoFiles: currentProblemPhotos.map(p => p.file)
+        });
+
+        // Atualizar lista visual
+        updateProblemsList();
+
+        // Limpar modal
+        document.getElementById('problemDescription').value = '';
+        document.getElementById('problemSearch').value = '';
+        document.getElementById('problemPhotos').value = '';
+        document.getElementById('modalPhotoPreview').innerHTML = '';
+        currentProblemPhotos = [];
+
+        // Fechar modal
+        bootstrap.Modal.getInstance(document.getElementById('addProblemModal')).hide();
+    });
+
+    function updateProblemsList() {
+        const list = document.getElementById('problemsList');
+
+        if (problemsArray.length === 0) {
+            list.innerHTML = '<p class="text-muted small mb-0 mt-2">Nenhum problema registrado ainda.</p>';
+            document.getElementById('problems_data').value = '';
+            return;
+        }
+
+        list.innerHTML = problemsArray.map((problem, index) => `
         <div class="card mb-2">
             <div class="card-body p-3">
                 <div class="d-flex justify-content-between align-items-start mb-2">
@@ -602,190 +754,280 @@ function updateProblemsList() {
             </div>
         </div>
     `).join('');
-    
-    // Atualizar input hidden com JSON incluindo as fotos em base64
-    const dataToSave = problemsArray.map(p => ({
-        description: p.description,
-        photos: p.photos // Já estão em base64 (dataUrl)
-    }));
-    document.getElementById('problems_data').value = JSON.stringify(dataToSave);
-}
 
-// Garantir que os dados sejam salvos antes do submit
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            updateProblemsData();
-        });
+        // Atualizar input hidden com JSON incluindo as fotos em base64
+        const dataToSave = problemsArray.map(p => ({
+            description: p.description,
+            photos: p.photos // Já estão em base64 (dataUrl)
+        }));
+        document.getElementById('problems_data').value = JSON.stringify(dataToSave);
     }
-});
 
-function removeProblem(index) {
-    if (confirm('Deseja remover este problema?')) {
-        problemsArray.splice(index, 1);
-        updateProblemsList();
+    // Garantir que os dados sejam salvos antes do submit
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                updateProblemsData();
+            });
+        }
+    });
+
+    function removeProblem(index) {
+        if (confirm('Deseja remover este problema?')) {
+            problemsArray.splice(index, 1);
+            updateProblemsList();
+        }
     }
-}
 
-// Inicializar lista vazia
-updateProblemsList();
+    // Inicializar lista vazia
+    updateProblemsList();
 </script>
 @endpush
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const manufacturerSelect = document.getElementById('manufacturer');
-    const modelSelect = document.getElementById('device_model');
-    const searchInput = document.getElementById('device_search');
-    const suggestionsDiv = document.getElementById('device_suggestions');
-    let searchTimeout;
-    
-    // Carregar modelos quando fabricante mudar
-    manufacturerSelect.addEventListener('change', function() {
-        const manufacturer = this.value;
-        
-        if (!manufacturer) {
-            modelSelect.disabled = true;
-            modelSelect.innerHTML = '<option value="">Primeiro selecione o fabricante...</option>';
-            return;
-        }
-        
-        modelSelect.disabled = true;
-        modelSelect.innerHTML = '<option value="">Carregando...</option>';
-        
-        fetch(`/api/devices/${encodeURIComponent(manufacturer)}/models`)
-            .then(response => response.json())
-            .then(models => {
-                modelSelect.innerHTML = '<option value="">Selecione o modelo...</option>';
-                models.forEach(model => {
-                    const option = document.createElement('option');
-                    option.value = model;
-                    option.textContent = model;
-                    modelSelect.appendChild(option);
-                });
-                modelSelect.disabled = false;
-            })
-            .catch(error => {
-                console.error('Erro ao carregar modelos:', error);
-                modelSelect.innerHTML = '<option value="">Erro ao carregar modelos</option>';
-            });
-    });
-    
-    // Busca de dispositivos
-    searchInput.addEventListener('input', function() {
-        const query = this.value.trim();
-        
-        clearTimeout(searchTimeout);
-        
-        if (query.length < 1) {
-            suggestionsDiv.style.display = 'none';
-            suggestionsDiv.innerHTML = '';
-            return;
-        }
-        
-        searchTimeout = setTimeout(() => {
-            fetch(`/api/devices/search?q=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(results => {
-                    suggestionsDiv.innerHTML = '';
-                    
-                    if (results.length === 0) {
-                        suggestionsDiv.innerHTML = '<div class="list-group-item text-muted">Nenhum dispositivo encontrado</div>';
-                    } else {
-                        results.forEach(device => {
-                            const item = document.createElement('a');
-                            item.href = '#';
-                            item.className = 'list-group-item list-group-item-action';
-                            item.innerHTML = `<strong>${device.manufacturer}</strong> ${device.model}`;
-                            item.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                
-                                // Preencher os selects
-                                manufacturerSelect.value = device.manufacturer;
-                                manufacturerSelect.dispatchEvent(new Event('change'));
-                                
-                                // Aguardar os modelos carregarem e então selecionar
-                                setTimeout(() => {
-                                    modelSelect.value = device.model;
-                                }, 500);
-                                
-                                // Limpar busca
-                                searchInput.value = device.label;
-                                suggestionsDiv.style.display = 'none';
+    document.addEventListener('DOMContentLoaded', function() {
+        // ===== BUSCA DE CLIENTES =====
+        const customerSearchInput = document.getElementById('customer_search');
+        const customerSuggestionsDiv = document.getElementById('customer_suggestions');
+        const customerSelect = document.getElementById('customer_id');
+        const customerDocumentInput = document.getElementById('customer_document');
+        let customerSearchTimeout;
+
+        // Busca de clientes
+        customerSearchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+
+            clearTimeout(customerSearchTimeout);
+
+            if (query.length < 2) {
+                customerSuggestionsDiv.style.display = 'none';
+                customerSuggestionsDiv.innerHTML = '';
+                return;
+            }
+
+            customerSearchTimeout = setTimeout(() => {
+                fetch(`/api/customers/search?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(results => {
+                        customerSuggestionsDiv.innerHTML = '';
+
+                        if (results.length === 0) {
+                            customerSuggestionsDiv.innerHTML = '<div class="list-group-item text-muted">Nenhum cliente encontrado</div>';
+                        } else {
+                            results.forEach(customer => {
+                                const item = document.createElement('a');
+                                item.href = '#';
+                                item.className = 'list-group-item list-group-item-action';
+                                item.innerHTML = `
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <strong>${customer.name}</strong><br>
+                                        <small class="text-muted">${customer.phone}</small>
+                                    </div>
+                                    ${customer.document ? `<small class="text-muted">${customer.document}</small>` : ''}
+                                </div>
+                            `;
+                                item.addEventListener('click', function(e) {
+                                    e.preventDefault();
+
+                                    // Preencher o select de clientes
+                                    customerSelect.value = customer.id;
+
+                                    // Preencher o campo de documento automaticamente
+                                    if (customer.document) {
+                                        customerDocumentInput.value = customer.document;
+                                    }
+
+                                    // Atualizar o campo de busca com o nome selecionado
+                                    customerSearchInput.value = customer.label;
+
+                                    // Fechar sugestões
+                                    customerSuggestionsDiv.style.display = 'none';
+
+                                    // Trigger change event no select
+                                    customerSelect.dispatchEvent(new Event('change'));
+                                });
+                                customerSuggestionsDiv.appendChild(item);
                             });
-                            suggestionsDiv.appendChild(item);
-                        });
-                    }
-                    
-                    suggestionsDiv.style.display = 'block';
+                        }
+
+                        customerSuggestionsDiv.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Erro na busca de clientes:', error);
+                        customerSuggestionsDiv.innerHTML = '<div class="list-group-item text-danger">Erro ao buscar clientes</div>';
+                        customerSuggestionsDiv.style.display = 'block';
+                    });
+            }, 300);
+        });
+
+        // Fechar sugestões de clientes ao clicar fora
+        document.addEventListener('click', function(e) {
+            if (!customerSearchInput.contains(e.target) && !customerSuggestionsDiv.contains(e.target)) {
+                customerSuggestionsDiv.style.display = 'none';
+            }
+        });
+
+        // Atualizar o campo de documento quando mudar o cliente no select
+        customerSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const document = selectedOption.getAttribute('data-document');
+            if (document && !customerDocumentInput.value) {
+                customerDocumentInput.value = document;
+            }
+        });
+
+        // ===== BUSCA DE DISPOSITIVOS =====
+        const manufacturerSelect = document.getElementById('manufacturer');
+        const modelSelect = document.getElementById('device_model');
+        const searchInput = document.getElementById('device_search');
+        const suggestionsDiv = document.getElementById('device_suggestions');
+        let searchTimeout; // Carregar modelos quando fabricante mudar
+        manufacturerSelect.addEventListener('change', function() {
+            const manufacturer = this.value;
+
+            if (!manufacturer) {
+                modelSelect.disabled = true;
+                modelSelect.innerHTML = '<option value="">Primeiro selecione o fabricante...</option>';
+                return;
+            }
+
+            modelSelect.disabled = true;
+            modelSelect.innerHTML = '<option value="">Carregando...</option>';
+
+            fetch(`/api/devices/${encodeURIComponent(manufacturer)}/models`)
+                .then(response => response.json())
+                .then(models => {
+                    modelSelect.innerHTML = '<option value="">Selecione o modelo...</option>';
+                    models.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model;
+                        option.textContent = model;
+                        modelSelect.appendChild(option);
+                    });
+                    modelSelect.disabled = false;
                 })
                 .catch(error => {
-                    console.error('Erro na busca:', error);
+                    console.error('Erro ao carregar modelos:', error);
+                    modelSelect.innerHTML = '<option value="">Erro ao carregar modelos</option>';
                 });
-        }, 300);
-    });
-    
-    // Fechar sugestões ao clicar fora
-    document.addEventListener('click', function(e) {
-        if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
-            suggestionsDiv.style.display = 'none';
-        }
-    });
-    
-    // Cálculo automático do custo estimado total
-    const priceInput = document.getElementById('price');
-    const partsCostInput = document.getElementById('parts_cost');
-    const extraCostValueInput = document.getElementById('extra_cost_value');
-    const estimatedCostInput = document.getElementById('estimated_cost');
-    const discountTypeSelect = document.getElementById('discount_type');
-    const discountValueInput = document.getElementById('discount_value');
-    const discountDisplay = document.getElementById('discount_display');
-    const subtotalDisplay = document.getElementById('subtotal_display');
-    const totalDisplay = document.getElementById('total_display');
-    
-    function calculateTotals() {
-        // Calcular subtotal (mão de obra + peças + custo extra)
-        const price = parseFloat(priceInput.value) || 0;
-        const partsCost = parseFloat(partsCostInput.value) || 0;
-        const extraCost = parseFloat(extraCostValueInput.value) || 0;
-        const subtotal = price + partsCost + extraCost;
-        
-        // Atualizar custo estimado
-        estimatedCostInput.value = subtotal.toFixed(2);
-        
-        // Calcular desconto
-        const discountType = discountTypeSelect.value;
-        const discountValue = parseFloat(discountValueInput.value) || 0;
-        let discountAmount = 0;
-        
-        if (discountValue > 0) {
-            if (discountType === 'percentage') {
-                const percentage = Math.min(discountValue, 100);
-                discountAmount = (subtotal * percentage) / 100;
-            } else {
-                discountAmount = Math.min(discountValue, subtotal);
+        });
+
+        // Busca de dispositivos
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+
+            clearTimeout(searchTimeout);
+
+            if (query.length < 1) {
+                suggestionsDiv.style.display = 'none';
+                suggestionsDiv.innerHTML = '';
+                return;
             }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/api/devices/search?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(results => {
+                        suggestionsDiv.innerHTML = '';
+
+                        if (results.length === 0) {
+                            suggestionsDiv.innerHTML = '<div class="list-group-item text-muted">Nenhum dispositivo encontrado</div>';
+                        } else {
+                            results.forEach(device => {
+                                const item = document.createElement('a');
+                                item.href = '#';
+                                item.className = 'list-group-item list-group-item-action';
+                                item.innerHTML = `<strong>${device.manufacturer}</strong> ${device.model}`;
+                                item.addEventListener('click', function(e) {
+                                    e.preventDefault();
+
+                                    // Preencher os selects
+                                    manufacturerSelect.value = device.manufacturer;
+                                    manufacturerSelect.dispatchEvent(new Event('change'));
+
+                                    // Aguardar os modelos carregarem e então selecionar
+                                    setTimeout(() => {
+                                        modelSelect.value = device.model;
+                                    }, 500);
+
+                                    // Limpar busca
+                                    searchInput.value = device.label;
+                                    suggestionsDiv.style.display = 'none';
+                                });
+                                suggestionsDiv.appendChild(item);
+                            });
+                        }
+
+                        suggestionsDiv.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Erro na busca:', error);
+                    });
+            }, 300);
+        });
+
+        // Fechar sugestões ao clicar fora
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                suggestionsDiv.style.display = 'none';
+            }
+        });
+
+        // Cálculo automático do custo estimado total
+        const priceInput = document.getElementById('price');
+        const partsCostInput = document.getElementById('parts_cost');
+        const extraCostValueInput = document.getElementById('extra_cost_value');
+        const estimatedCostInput = document.getElementById('estimated_cost');
+        const discountTypeSelect = document.getElementById('discount_type');
+        const discountValueInput = document.getElementById('discount_value');
+        const discountDisplay = document.getElementById('discount_display');
+        const subtotalDisplay = document.getElementById('subtotal_display');
+        const totalDisplay = document.getElementById('total_display');
+
+        function calculateTotals() {
+            // Calcular subtotal (mão de obra + peças + custo extra)
+            const price = parseFloat(priceInput.value) || 0;
+            const partsCost = parseFloat(partsCostInput.value) || 0;
+            const extraCost = parseFloat(extraCostValueInput.value) || 0;
+            const subtotal = price + partsCost + extraCost;
+
+            // Atualizar custo estimado
+            estimatedCostInput.value = subtotal.toFixed(2);
+
+            // Calcular desconto
+            const discountType = discountTypeSelect.value;
+            const discountValue = parseFloat(discountValueInput.value) || 0;
+            let discountAmount = 0;
+
+            if (discountValue > 0) {
+                if (discountType === 'percentage') {
+                    const percentage = Math.min(discountValue, 100);
+                    discountAmount = (subtotal * percentage) / 100;
+                } else {
+                    discountAmount = Math.min(discountValue, subtotal);
+                }
+            }
+
+            const total = subtotal - discountAmount;
+
+            // Atualizar displays
+            subtotalDisplay.textContent = 'R$ ' + subtotal.toFixed(2).replace('.', ',');
+            discountDisplay.value = 'R$ ' + discountAmount.toFixed(2).replace('.', ',');
+            totalDisplay.textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
         }
-        
-        const total = subtotal - discountAmount;
-        
-        // Atualizar displays
-        subtotalDisplay.textContent = 'R$ ' + subtotal.toFixed(2).replace('.', ',');
-        discountDisplay.value = 'R$ ' + discountAmount.toFixed(2).replace('.', ',');
-        totalDisplay.textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
-    }
-    
-    // Adicionar listeners para atualizar em tempo real
-    priceInput.addEventListener('input', calculateTotals);
-    partsCostInput.addEventListener('input', calculateTotals);
-    extraCostValueInput.addEventListener('input', calculateTotals);
-    discountTypeSelect.addEventListener('change', calculateTotals);
-    discountValueInput.addEventListener('input', calculateTotals);
-    
-    // Calcular valores iniciais ao carregar a página
-    calculateTotals();
-});
+
+        // Adicionar listeners para atualizar em tempo real
+        priceInput.addEventListener('input', calculateTotals);
+        partsCostInput.addEventListener('input', calculateTotals);
+        extraCostValueInput.addEventListener('input', calculateTotals);
+        discountTypeSelect.addEventListener('change', calculateTotals);
+        discountValueInput.addEventListener('input', calculateTotals);
+
+        // Calcular valores iniciais ao carregar a página
+        calculateTotals();
+    });
 </script>
 @endpush

@@ -5,13 +5,17 @@
 
 @push('styles')
 <style>
-#device_suggestions {
-    max-width: 100%;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-#device_suggestions .list-group-item:hover {
-    background-color: #f8f9fa;
-}
+    #device_suggestions,
+    #customer_suggestions {
+        max-width: 100%;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #device_suggestions .list-group-item:hover,
+    #customer_suggestions .list-group-item:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
 </style>
 @endpush
 
@@ -24,31 +28,46 @@
                     @csrf
                     @method('PUT')
 
+                    <!-- Campo de Busca de Cliente -->
+                    <div class="mb-3">
+                        <label for="customer_search" class="form-label fw-bold">
+                            <i class="bi bi-search"></i> Buscar Cliente
+                        </label>
+                        <input type="text"
+                            id="customer_search"
+                            class="form-control form-control-lg"
+                            placeholder="Digite o nome ou telefone do cliente para buscar..."
+                            autocomplete="off">
+                        <div id="customer_suggestions" class="list-group mt-1" style="display: none; position: absolute; z-index: 1000; max-height: 300px; overflow-y: auto;"></div>
+                        <small class="text-muted">Digite pelo menos 2 caracteres para buscar rapidamente</small>
+                    </div>
+
                     <div class="mb-3">
                         <label for="customer_id" class="form-label fw-bold">Cliente *</label>
                         <select name="customer_id" id="customer_id" class="form-select form-select-lg @error('customer_id') is-invalid @enderror" required>
                             @foreach($customers as $customer)
-                                <option value="{{ $customer->id }}" 
-                                        {{ old('customer_id', $serviceOrder->customer_id) == $customer->id ? 'selected' : '' }}>
-                                    {{ $customer->name }} - {{ $customer->phone }}
-                                </option>
+                            <option value="{{ $customer->id }}"
+                                data-document="{{ $customer->document ?? '' }}"
+                                {{ old('customer_id', $serviceOrder->customer_id) == $customer->id ? 'selected' : '' }}>
+                                {{ $customer->name }} - {{ $customer->phone }}
+                            </option>
                             @endforeach
                         </select>
                         @error('customer_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="mb-3">
                         <label for="customer_document" class="form-label fw-bold">CPF/CNPJ do Cliente *</label>
-                        <input type="text" name="customer_document" id="customer_document" 
-                               class="form-control form-control-lg @error('customer_document') is-invalid @enderror" 
-                               value="{{ old('customer_document', $serviceOrder->customer_document) }}" 
-                               placeholder="000.000.000-00 ou 00.000.000/0000-00" 
-                               required 
-                               maxlength="20">
+                        <input type="text" name="customer_document" id="customer_document"
+                            class="form-control form-control-lg @error('customer_document') is-invalid @enderror"
+                            value="{{ old('customer_document', $serviceOrder->customer_document) }}"
+                            placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                            required
+                            maxlength="20">
                         @error('customer_document')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <small class="text-muted">CPF ou CNPJ do cliente para vinculação jurídica do aparelho</small>
                     </div>
@@ -67,13 +86,13 @@
                             <select name="manufacturer" id="manufacturer" class="form-select form-select-lg @error('manufacturer') is-invalid @enderror" required>
                                 <option value="">Selecione o fabricante...</option>
                                 @foreach($manufacturers as $mfr)
-                                    <option value="{{ $mfr }}" {{ old('manufacturer', $serviceOrder->manufacturer) == $mfr ? 'selected' : '' }}>
-                                        {{ $mfr }}
-                                    </option>
+                                <option value="{{ $mfr }}" {{ old('manufacturer', $serviceOrder->manufacturer) == $mfr ? 'selected' : '' }}>
+                                    {{ $mfr }}
+                                </option>
                                 @endforeach
                             </select>
                             @error('manufacturer')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -81,13 +100,13 @@
                             <label for="device_model" class="form-label fw-bold">Modelo do Dispositivo *</label>
                             <select name="device_model" id="device_model" class="form-select form-select-lg @error('device_model') is-invalid @enderror" required>
                                 @if($serviceOrder->device_model)
-                                    <option value="{{ $serviceOrder->device_model }}" selected>{{ $serviceOrder->device_model }}</option>
+                                <option value="{{ $serviceOrder->device_model }}" selected>{{ $serviceOrder->device_model }}</option>
                                 @else
-                                    <option value="">Primeiro selecione o fabricante...</option>
+                                <option value="">Primeiro selecione o fabricante...</option>
                                 @endif
                             </select>
                             @error('device_model')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
@@ -96,7 +115,7 @@
                         <label for="device_imei" class="form-label fw-bold">IMEI</label>
                         <input type="text" name="device_imei" id="device_imei" class="form-control form-control-lg @error('device_imei') is-invalid @enderror" value="{{ old('device_imei', $serviceOrder->device_imei) }}">
                         @error('device_imei')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -104,7 +123,7 @@
                         <label for="problem_description" class="form-label fw-bold">Descrição do Problema *</label>
                         <textarea name="problem_description" id="problem_description" rows="4" class="form-control form-control-lg @error('problem_description') is-invalid @enderror" required>{{ old('problem_description', $serviceOrder->problem_description) }}</textarea>
                         @error('problem_description')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -112,7 +131,7 @@
                         <label for="diagnostic" class="form-label fw-bold">Diagnóstico Técnico</label>
                         <textarea name="diagnostic" id="diagnostic" rows="3" class="form-control form-control-lg @error('diagnostic') is-invalid @enderror">{{ old('diagnostic', $serviceOrder->diagnostic) }}</textarea>
                         @error('diagnostic')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -121,7 +140,7 @@
                             <label for="deadline" class="form-label fw-bold">Prazo de Entrega</label>
                             <input type="date" name="deadline" id="deadline" class="form-control form-control-lg @error('deadline') is-invalid @enderror" value="{{ old('deadline', $serviceOrder->deadline?->format('Y-m-d')) }}">
                             @error('deadline')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -135,7 +154,7 @@
                                 <option value="cancelled" {{ old('status', $serviceOrder->status) == 'cancelled' ? 'selected' : '' }}>Cancelada</option>
                             </select>
                             @error('status')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
@@ -144,7 +163,7 @@
                         <label for="notes" class="form-label fw-bold">Observações</label>
                         <textarea name="notes" id="notes" rows="2" class="form-control form-control-lg @error('notes') is-invalid @enderror">{{ old('notes', $serviceOrder->notes) }}</textarea>
                         @error('notes')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -222,7 +241,7 @@
                         <strong><i class="bi bi-exclamation-triangle-fill"></i> Atenção!</strong>
                         <p class="mb-0 mt-2">Esta ação <strong>NÃO PODE SER DESFEITA</strong>. A ordem de serviço será marcada como cancelada permanentemente.</p>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="cancellation_reason" class="form-label fw-bold">Razão do Cancelamento *</label>
                         <textarea name="cancellation_reason" id="cancellation_reason" rows="4" class="form-control" required placeholder="Descreva o motivo do cancelamento desta ordem de serviço (mínimo 10 caracteres)"></textarea>
@@ -245,119 +264,210 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const manufacturerSelect = document.getElementById('manufacturer');
-    const modelSelect = document.getElementById('device_model');
-    const searchInput = document.getElementById('device_search');
-    const suggestionsDiv = document.getElementById('device_suggestions');
-    let searchTimeout;
-    
-    // Modelo atual da OS
-    const currentModel = '{{ old("device_model", $serviceOrder->device_model) }}';
-    const currentManufacturer = '{{ old("manufacturer", $serviceOrder->manufacturer) }}';
-    
-    // Carregar modelos quando fabricante mudar
-    manufacturerSelect.addEventListener('change', function() {
-        const manufacturer = this.value;
-        
-        if (!manufacturer) {
-            modelSelect.disabled = true;
-            modelSelect.innerHTML = '<option value="">Primeiro selecione o fabricante...</option>';
-            return;
-        }
-        
-        modelSelect.disabled = true;
-        modelSelect.innerHTML = '<option value="">Carregando...</option>';
-        
-        fetch(`/api/devices/${encodeURIComponent(manufacturer)}/models`)
-            .then(response => response.json())
-            .then(models => {
-                modelSelect.innerHTML = '<option value="">Selecione o modelo...</option>';
-                models.forEach(model => {
-                    const option = document.createElement('option');
-                    option.value = model;
-                    option.textContent = model;
-                    if (model === currentModel) {
-                        option.selected = true;
-                    }
-                    modelSelect.appendChild(option);
-                });
-                modelSelect.disabled = false;
-            })
-            .catch(error => {
-                console.error('Erro ao carregar modelos:', error);
-                modelSelect.innerHTML = '<option value="">Erro ao carregar modelos</option>';
-                modelSelect.disabled = false;
-            });
-    });
-    
-    // Carregar modelos iniciais se fabricante já estiver selecionado
-    if (manufacturerSelect.value && currentManufacturer) {
-        // Disparar o evento de change para carregar os modelos do fabricante atual
-        manufacturerSelect.dispatchEvent(new Event('change'));
-    }
-    
-    // Busca de dispositivos
-    searchInput.addEventListener('input', function() {
-        const query = this.value.trim();
-        
-        clearTimeout(searchTimeout);
-        
-        if (query.length < 1) {
-            suggestionsDiv.style.display = 'none';
-            suggestionsDiv.innerHTML = '';
-            return;
-        }
-        
-        searchTimeout = setTimeout(() => {
-            fetch(`/api/devices/search?q=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(results => {
-                    suggestionsDiv.innerHTML = '';
-                    
-                    if (results.length === 0) {
-                        suggestionsDiv.innerHTML = '<div class="list-group-item text-muted">Nenhum dispositivo encontrado</div>';
-                    } else {
-                        results.forEach(device => {
-                            const item = document.createElement('a');
-                            item.href = '#';
-                            item.className = 'list-group-item list-group-item-action';
-                            item.innerHTML = `<strong>${device.manufacturer}</strong> ${device.model}`;
-                            item.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                
-                                // Preencher os selects
-                                manufacturerSelect.value = device.manufacturer;
-                                manufacturerSelect.dispatchEvent(new Event('change'));
-                                
-                                // Aguardar os modelos carregarem e então selecionar
-                                setTimeout(() => {
-                                    modelSelect.value = device.model;
-                                }, 500);
-                                
-                                // Limpar busca
-                                searchInput.value = device.label;
-                                suggestionsDiv.style.display = 'none';
+    document.addEventListener('DOMContentLoaded', function() {
+        // ===== BUSCA DE CLIENTES =====
+        const customerSearchInput = document.getElementById('customer_search');
+        const customerSuggestionsDiv = document.getElementById('customer_suggestions');
+        const customerSelect = document.getElementById('customer_id');
+        const customerDocumentInput = document.getElementById('customer_document');
+        let customerSearchTimeout;
+
+        // Busca de clientes
+        customerSearchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+
+            clearTimeout(customerSearchTimeout);
+
+            if (query.length < 2) {
+                customerSuggestionsDiv.style.display = 'none';
+                customerSuggestionsDiv.innerHTML = '';
+                return;
+            }
+
+            customerSearchTimeout = setTimeout(() => {
+                fetch(`/api/customers/search?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(results => {
+                        customerSuggestionsDiv.innerHTML = '';
+
+                        if (results.length === 0) {
+                            customerSuggestionsDiv.innerHTML = '<div class="list-group-item text-muted">Nenhum cliente encontrado</div>';
+                        } else {
+                            results.forEach(customer => {
+                                const item = document.createElement('a');
+                                item.href = '#';
+                                item.className = 'list-group-item list-group-item-action';
+                                item.innerHTML = `
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <strong>${customer.name}</strong><br>
+                                        <small class="text-muted">${customer.phone}</small>
+                                    </div>
+                                    ${customer.document ? `<small class="text-muted">${customer.document}</small>` : ''}
+                                </div>
+                            `;
+                                item.addEventListener('click', function(e) {
+                                    e.preventDefault();
+
+                                    // Preencher o select de clientes
+                                    customerSelect.value = customer.id;
+
+                                    // Preencher o campo de documento automaticamente
+                                    if (customer.document) {
+                                        customerDocumentInput.value = customer.document;
+                                    }
+
+                                    // Atualizar o campo de busca com o nome selecionado
+                                    customerSearchInput.value = customer.label;
+
+                                    // Fechar sugestões
+                                    customerSuggestionsDiv.style.display = 'none';
+
+                                    // Trigger change event no select
+                                    customerSelect.dispatchEvent(new Event('change'));
+                                });
+                                customerSuggestionsDiv.appendChild(item);
                             });
-                            suggestionsDiv.appendChild(item);
-                        });
-                    }
-                    
-                    suggestionsDiv.style.display = 'block';
+                        }
+
+                        customerSuggestionsDiv.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Erro na busca de clientes:', error);
+                        customerSuggestionsDiv.innerHTML = '<div class="list-group-item text-danger">Erro ao buscar clientes</div>';
+                        customerSuggestionsDiv.style.display = 'block';
+                    });
+            }, 300);
+        });
+
+        // Fechar sugestões de clientes ao clicar fora
+        document.addEventListener('click', function(e) {
+            if (!customerSearchInput.contains(e.target) && !customerSuggestionsDiv.contains(e.target)) {
+                customerSuggestionsDiv.style.display = 'none';
+            }
+        });
+
+        // Atualizar o campo de documento quando mudar o cliente no select
+        customerSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const document = selectedOption.getAttribute('data-document');
+            if (document && !customerDocumentInput.value) {
+                customerDocumentInput.value = document;
+            }
+        });
+
+        // ===== BUSCA DE DISPOSITIVOS =====
+        const manufacturerSelect = document.getElementById('manufacturer');
+        const modelSelect = document.getElementById('device_model');
+        const searchInput = document.getElementById('device_search');
+        const suggestionsDiv = document.getElementById('device_suggestions');
+        let searchTimeout;
+
+        // Modelo atual da OS
+        const currentModel = '{{ old("device_model", $serviceOrder->device_model) }}';
+        const currentManufacturer = '{{ old("manufacturer", $serviceOrder->manufacturer) }}';
+
+        // Carregar modelos quando fabricante mudar
+        manufacturerSelect.addEventListener('change', function() {
+            const manufacturer = this.value;
+
+            if (!manufacturer) {
+                modelSelect.disabled = true;
+                modelSelect.innerHTML = '<option value="">Primeiro selecione o fabricante...</option>';
+                return;
+            }
+
+            modelSelect.disabled = true;
+            modelSelect.innerHTML = '<option value="">Carregando...</option>';
+
+            fetch(`/api/devices/${encodeURIComponent(manufacturer)}/models`)
+                .then(response => response.json())
+                .then(models => {
+                    modelSelect.innerHTML = '<option value="">Selecione o modelo...</option>';
+                    models.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model;
+                        option.textContent = model;
+                        if (model === currentModel) {
+                            option.selected = true;
+                        }
+                        modelSelect.appendChild(option);
+                    });
+                    modelSelect.disabled = false;
                 })
                 .catch(error => {
-                    console.error('Erro na busca:', error);
+                    console.error('Erro ao carregar modelos:', error);
+                    modelSelect.innerHTML = '<option value="">Erro ao carregar modelos</option>';
+                    modelSelect.disabled = false;
                 });
-        }, 300);
-    });
-    
-    // Fechar sugestões ao clicar fora
-    document.addEventListener('click', function(e) {
-        if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
-            suggestionsDiv.style.display = 'none';
+        });
+
+        // Carregar modelos iniciais se fabricante já estiver selecionado
+        if (manufacturerSelect.value && currentManufacturer) {
+            // Disparar o evento de change para carregar os modelos do fabricante atual
+            manufacturerSelect.dispatchEvent(new Event('change'));
         }
+
+        // Busca de dispositivos
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+
+            clearTimeout(searchTimeout);
+
+            if (query.length < 1) {
+                suggestionsDiv.style.display = 'none';
+                suggestionsDiv.innerHTML = '';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/api/devices/search?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(results => {
+                        suggestionsDiv.innerHTML = '';
+
+                        if (results.length === 0) {
+                            suggestionsDiv.innerHTML = '<div class="list-group-item text-muted">Nenhum dispositivo encontrado</div>';
+                        } else {
+                            results.forEach(device => {
+                                const item = document.createElement('a');
+                                item.href = '#';
+                                item.className = 'list-group-item list-group-item-action';
+                                item.innerHTML = `<strong>${device.manufacturer}</strong> ${device.model}`;
+                                item.addEventListener('click', function(e) {
+                                    e.preventDefault();
+
+                                    // Preencher os selects
+                                    manufacturerSelect.value = device.manufacturer;
+                                    manufacturerSelect.dispatchEvent(new Event('change'));
+
+                                    // Aguardar os modelos carregarem e então selecionar
+                                    setTimeout(() => {
+                                        modelSelect.value = device.model;
+                                    }, 500);
+
+                                    // Limpar busca
+                                    searchInput.value = device.label;
+                                    suggestionsDiv.style.display = 'none';
+                                });
+                                suggestionsDiv.appendChild(item);
+                            });
+                        }
+
+                        suggestionsDiv.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Erro na busca:', error);
+                    });
+            }, 300);
+        });
+
+        // Fechar sugestões ao clicar fora
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                suggestionsDiv.style.display = 'none';
+            }
+        });
     });
-});
 </script>
 @endpush
-
